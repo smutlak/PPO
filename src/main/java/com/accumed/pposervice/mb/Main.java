@@ -7,6 +7,8 @@ package com.accumed.pposervice.mb;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
+import org.shafafiya.www.v2.WebservicesLocator;
+import org.shafafiya.www.v2.WebservicesSoap;
 
 /**
  *
@@ -81,6 +83,14 @@ public class Main {
     }
     
     public void testRegConnection(){
+        WebservicesSoap soap;
+        try{
+            soap = new WebservicesLocator().getWebservicesSoap();
+            soap.searchTransactions(status, status, 0, signupPass, status, 0, 0, signupEmail, signupEmail, signupPass, 0, 0, searchTransactionsResult, foundTransactions, errorMessage);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         this.status = "Regulator connection test completed successfully.";
         this.PPOConnectionTest = true;
     }
