@@ -5,8 +5,12 @@
  */
 package com.accumed.pposervice.mb;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
+import javax.xml.rpc.holders.IntHolder;
+import javax.xml.rpc.holders.StringHolder;
 import org.shafafiya.www.v2.WebservicesLocator;
 import org.shafafiya.www.v2.WebservicesSoap;
 
@@ -84,13 +88,40 @@ public class Main {
     
     public void testRegConnection(){
         WebservicesSoap soap;
-        try{
+
+        java.util.Date currDate = new java.util.Date();
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(currDate);
+        cal.add(java.util.Calendar.DAY_OF_YEAR, -95);
+        java.util.Date fromDate = cal.getTime();
+        java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+
+        IntHolder searchTransactionsResult = new IntHolder();
+        StringHolder foundTransactions = new StringHolder();
+        StringHolder errorMessage = new StringHolder();
+
+        try { // Call Web Service Operation
+
             soap = new WebservicesLocator().getWebservicesSoap();
-            soap.searchTransactions(status, status, 0, signupPass, status, 0, 0, signupEmail, signupEmail, signupPass, 0, 0, searchTransactionsResult, foundTransactions, errorMessage);
-        }catch (Exception e) {
-            e.printStackTrace();
+            soap.searchTransactions(this.signupRegUsr, this.signupRegPass,
+                    1, this.signupFacilityLicense,
+                    null, 2, 2, null, formatter.format(fromDate),
+                    formatter.format(currDate), -1, -1, searchTransactionsResult, foundTransactions, errorMessage);
+
+        } catch (Exception ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, "Exception caught", ex);
+            ex.printStackTrace();
+            this.status = ex.getMessage();
+            this.PPOConnectionTest = false;
+            return;
         }
-        
+
+        if (errorMessage.value != null) {
+            this.status = errorMessage.value;
+            this.PPOConnectionTest = false;
+            return;
+        }
+
         this.status = "Regulator connection test completed successfully.";
         this.PPOConnectionTest = true;
     }
