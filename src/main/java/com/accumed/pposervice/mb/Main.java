@@ -5,14 +5,11 @@
  */
 package com.accumed.pposervice.mb;
 
+import https.www_shafafiya_org.v2.Webservices;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
-import javax.xml.rpc.holders.IntHolder;
-import javax.xml.rpc.holders.StringHolder;
-import org.shafafiya.www.v2.WebservicesLocator;
-import org.shafafiya.www.v2.WebservicesSoap;
 
 /**
  *
@@ -21,6 +18,9 @@ import org.shafafiya.www.v2.WebservicesSoap;
 @ManagedBean
 @SessionScoped
 public class Main {
+
+    //@WebServiceRef(wsdlLocation = "WEB-INF/wsdl/shafafiya.doh.gov.ae/v3/webservices.asmx.wsdl")
+    private Webservices service;
     
     private String signupEmail;
     private String signupPass;
@@ -36,6 +36,7 @@ public class Main {
      * Creates a new instance of Main
      */
     public Main() {
+        service = new Webservices();
     }
 
     public String getSignupEmail() {
@@ -87,36 +88,45 @@ public class Main {
     }
     
     public void testRegConnection(){
-        WebservicesSoap soap;
-
+       
+        
         java.util.Date currDate = new java.util.Date();
         java.util.Calendar cal = java.util.Calendar.getInstance();
         cal.setTime(currDate);
         cal.add(java.util.Calendar.DAY_OF_YEAR, -95);
         java.util.Date fromDate = cal.getTime();
         java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-
-        IntHolder searchTransactionsResult = new IntHolder();
-        StringHolder foundTransactions = new StringHolder();
-        StringHolder errorMessage = new StringHolder();
-
+        
+        javax.xml.ws.Holder<Integer> searchTransactionsResult = new javax.xml.ws.Holder<Integer>();
+        javax.xml.ws.Holder<java.lang.String> foundTransactions = new javax.xml.ws.Holder<java.lang.String>();
+        javax.xml.ws.Holder<java.lang.String> errorMessage = new javax.xml.ws.Holder<java.lang.String>();
+        
         try { // Call Web Service Operation
-
-            soap = new WebservicesLocator().getWebservicesSoap();
-            soap.searchTransactions(this.signupRegUsr, this.signupRegPass,
-                    1, this.signupFacilityLicense,
-                    null, 2, 2, null, formatter.format(fromDate),
-                    formatter.format(currDate), -1, -1, searchTransactionsResult, foundTransactions, errorMessage);
-
+            https.www_shafafiya_org.v2.WebservicesSoap port = service.getWebservicesSoap();
+            // TODO initialize WS operation arguments here
+            java.lang.String login = this.signupRegUsr;
+            java.lang.String pwd = this.signupRegPass;
+            int direction = 1;
+            java.lang.String callerLicense = this.signupFacilityLicense;
+            java.lang.String ePartner = null;
+            int transactionID = 2;
+            int transactionStatus = 2;
+            java.lang.String transactionFileName = null;
+            java.lang.String transactionFromDate = formatter.format(fromDate);
+            java.lang.String transactionToDate = formatter.format(currDate);
+            int minRecordCount = -1;
+            int maxRecordCount = -1;
+            
+            port.searchTransactions(login, pwd, direction, callerLicense, ePartner, transactionID, transactionStatus, transactionFileName, transactionFromDate, transactionToDate, minRecordCount, maxRecordCount, searchTransactionsResult, foundTransactions, errorMessage);
         } catch (Exception ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, "Exception caught", ex);
-            ex.printStackTrace();
+            ex.printStackTrace();            
             this.status = ex.getMessage();
             this.PPOConnectionTest = false;
             return;
         }
-
-        if (errorMessage.value != null) {
+        
+        if(errorMessage.value != null && !errorMessage.value.isEmpty()){
             this.status = errorMessage.value;
             this.PPOConnectionTest = false;
             return;
