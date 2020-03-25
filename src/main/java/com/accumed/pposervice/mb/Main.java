@@ -131,6 +131,12 @@ public class Main {
             this.PPOConnectionTest = false;
             return;
         }
+        
+        if(searchTransactionsResult != null && searchTransactionsResult.value!=0){
+            this.status = "searchTransactionsResult returned="+searchTransactionsResult.value;
+            this.PPOConnectionTest = false;
+            return;
+        }
 
         this.status = "Regulator connection test completed successfully.";
         this.PPOConnectionTest = true;
