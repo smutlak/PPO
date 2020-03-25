@@ -7,6 +7,7 @@ package com.accumed.pposervice.ws;
 
 import com.accumed.pposervice.model.*;
 import com.haad.ClaimSubmission;
+import https.www_shafafiya_org.v2.Webservices;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jws.WebService;
@@ -24,6 +25,7 @@ import javax.persistence.Persistence;
 public class PPO {
 
     EntityManagerFactory entityManagerFactory;
+    
 
     @WebMethod(operationName = "getRegulators")
     public java.util.List<Regulator> getRegulators() {
@@ -37,6 +39,61 @@ public class PPO {
             em.close();
         }
         return ret;
+    }
+    
+    private https.www_shafafiya_org.v2.WebservicesSoap getWebServicePort(){
+        Webservices service = new Webservices();
+        return service.getWebservicesSoap();
+    }
+    
+    @WebMethod(operationName = "testRegConnection")
+    public String testRegConnection(@WebParam(name = "facilityLicense") String facilityLicense,
+            @WebParam(name = "regUsr") String regUsr,
+            @WebParam(name = "regPass") String regPass){
+        
+        java.util.Date currDate = new java.util.Date();
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(currDate);
+        cal.add(java.util.Calendar.DAY_OF_YEAR, -95);
+        java.util.Date fromDate = cal.getTime();
+        java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+        
+        javax.xml.ws.Holder<Integer> searchTransactionsResult = new javax.xml.ws.Holder<Integer>();
+        javax.xml.ws.Holder<java.lang.String> foundTransactions = new javax.xml.ws.Holder<java.lang.String>();
+        javax.xml.ws.Holder<java.lang.String> errorMessage = new javax.xml.ws.Holder<java.lang.String>();
+        
+        try { // Call Web Service Operation
+            https.www_shafafiya_org.v2.WebservicesSoap port = getWebServicePort();
+            // TODO initialize WS operation arguments here
+            java.lang.String login = regUsr;
+            java.lang.String pwd = regPass;
+            int direction = 1;
+            java.lang.String callerLicense = facilityLicense;
+            java.lang.String ePartner = null;
+            int transactionID = 2;
+            int transactionStatus = 2;
+            java.lang.String transactionFileName = null;
+            java.lang.String transactionFromDate = formatter.format(fromDate);
+            java.lang.String transactionToDate = formatter.format(currDate);
+            int minRecordCount = -1;
+            int maxRecordCount = -1;
+            
+            port.searchTransactions(login, pwd, direction, callerLicense, ePartner, transactionID, transactionStatus, transactionFileName, transactionFromDate, transactionToDate, minRecordCount, maxRecordCount, searchTransactionsResult, foundTransactions, errorMessage);
+        } catch (Exception ex) {
+            Logger.getLogger(PPO.class.getName()).log(Level.SEVERE, "Exception caught", ex);
+            ex.printStackTrace();            
+            return ex.getMessage();
+        }
+        
+        if(errorMessage.value != null && !errorMessage.value.isEmpty()){
+            return errorMessage.value;
+        }
+        
+        if(searchTransactionsResult != null && searchTransactionsResult.value!=0){
+            return "searchTransactionsResult returned="+searchTransactionsResult.value;
+        }
+
+        return "";
     }
 
     @WebMethod(operationName = "signUp")
@@ -118,8 +175,34 @@ public class PPO {
         
         return true;
     }
+    
+    @WebMethod(operationName = "ProcessPendingTransactions")
+    public Boolean ProcessPendingTransactions(){
+        
+        //get top facility
+        //get top facility last job info
+        //call ppo for remaining transactions
+        //loop in the returned transactions & zip & parse & save each one.
+        /*
+        EntityManager em = getEMFactory().createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.persist(claimSubmission);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            em.getTransaction().rollback();
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+        } finally {
+            em.close();
+        }
+    */
+        return true;
+    }
+    
 
     private EntityManagerFactory getEMFactory() {
         return entityManagerFactory != null ? entityManagerFactory : Persistence.createEntityManagerFactory("PPOServicePU");
     }
+    
+    
 }

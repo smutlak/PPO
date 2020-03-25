@@ -31,7 +31,7 @@
                 <h:inputText id="signupRegPass" value="#{main.signupRegPass}"></h:inputText>
             </h:panelGrid>
             <p:commandButton value="Test Connection" actionListener="#{main.testRegConnection()}" update="status" />
-            <p:commandButton value="Register"/>
+            <p:commandButton value="Register" actionListener="#{main.signup()}" update="status"/>
             <p:commandButton value="Login" action="login?faces-redirect=true"/>
             <br/>
             <p:outputLabel id="status" style="color: red;" value="#{main.status}"></p:outputLabel>

@@ -87,8 +87,11 @@ public class Main {
         this.signupRegPass = signupRegPass;
     }
     
+    public void signup(){
+        
+    }
+    
     public void testRegConnection(){
-       
         
         java.util.Date currDate = new java.util.Date();
         java.util.Calendar cal = java.util.Calendar.getInstance();
