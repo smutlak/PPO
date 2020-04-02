@@ -97,13 +97,14 @@ public class PPO {
     }
 
     @WebMethod(operationName = "signUp")
-    public String signUp(@WebParam(name = "email") String email,
+    public Long signUp(@WebParam(name = "email") String email,
             @WebParam(name = "pass") String pass,
             @WebParam(name = "regualtorID") String regualtorID,
             @WebParam(name = "facilityLicense") String facilityLicense,
             @WebParam(name = "regUsr") String regUsr,
             @WebParam(name = "regPass") String regPass) {
 
+        Account account;
         Long regID = Long.parseLong(regualtorID);
 
         Regulator regulator = null;
@@ -115,7 +116,7 @@ public class PPO {
             }
         }
         if (regulator == null) {
-            return "0";
+            return -1L;
         }
 
         RegLoginDetails regLoginDetails = new RegLoginDetails();
@@ -126,7 +127,7 @@ public class PPO {
 
         regulator.getRegLoginDetails().add(regLoginDetails);
 
-        Account account = new Account();
+        account = new Account();
         account.setEmail(email);
         account.setEnabled(Boolean.TRUE);
         account.setExpireDate(null);
@@ -148,7 +149,7 @@ public class PPO {
         } finally {
             em.close();
         }
-        return "1";
+        return account==null?-1L:account.getId();
     }
 
     @WebMethod(operationName = "readClaimSubmission")
@@ -197,6 +198,67 @@ public class PPO {
         }
     */
         return true;
+    }
+    
+    @WebMethod(operationName = "getFacilityMonthTransaction")
+    public Boolean getFacilityMonthTransaction(@WebParam(name = "accountId") Long accountId){
+        
+        EntityManager em = getEMFactory().createEntityManager();
+        try {
+           Account account = (Account)em.createNamedQuery("Account.findAll").setParameter("id", accountId).getSingleResult();
+        } catch (Exception e) {
+            em.getTransaction().rollback();
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+        } finally {
+            em.close();
+        }
+        /*
+        return true;
+        
+        java.util.Date currDate = new java.util.Date();
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.setTime(currDate);
+        cal.add(java.util.Calendar.DAY_OF_YEAR, -95);
+        java.util.Date fromDate = cal.getTime();
+        java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+        
+        javax.xml.ws.Holder<Integer> searchTransactionsResult = new javax.xml.ws.Holder<Integer>();
+        javax.xml.ws.Holder<java.lang.String> foundTransactions = new javax.xml.ws.Holder<java.lang.String>();
+        javax.xml.ws.Holder<java.lang.String> errorMessage = new javax.xml.ws.Holder<java.lang.String>();
+        
+        try { // Call Web Service Operation
+            https.www_shafafiya_org.v2.WebservicesSoap port = getWebServicePort();
+            // TODO initialize WS operation arguments here
+            java.lang.String login = regUsr;
+            java.lang.String pwd = regPass;
+            int direction = 1;
+            java.lang.String callerLicense = facilityLicense;
+            java.lang.String ePartner = null;
+            int transactionID = 2;
+            int transactionStatus = 2;
+            java.lang.String transactionFileName = null;
+            java.lang.String transactionFromDate = formatter.format(fromDate);
+            java.lang.String transactionToDate = formatter.format(currDate);
+            int minRecordCount = -1;
+            int maxRecordCount = -1;
+            
+            port.searchTransactions(login, pwd, direction, callerLicense, ePartner, transactionID, transactionStatus, transactionFileName, transactionFromDate, transactionToDate, minRecordCount, maxRecordCount, searchTransactionsResult, foundTransactions, errorMessage);
+        } catch (Exception ex) {
+            Logger.getLogger(PPO.class.getName()).log(Level.SEVERE, "Exception caught", ex);
+            ex.printStackTrace();            
+            return ex.getMessage();
+        }
+        
+        if(errorMessage.value != null && !errorMessage.value.isEmpty()){
+            return errorMessage.value;
+        }
+        
+        if(searchTransactionsResult != null && searchTransactionsResult.value!=0){
+            return "searchTransactionsResult returned="+searchTransactionsResult.value;
+        }
+
+        return "";*/
+        return false;
     }
     
 
