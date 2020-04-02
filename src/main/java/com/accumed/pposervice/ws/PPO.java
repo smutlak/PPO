@@ -267,13 +267,17 @@ public class PPO {
 
         if (trans != null) {
             em = getEMFactory().createEntityManager();
+            
             try {
+                em.getTransaction().begin();
                 for (AccountTransaction tran : trans) {
                     tran.setAccount(account);
                     em.persist(tran);
                 }
+                em.getTransaction().commit();
             } catch (Exception e) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+                em.getTransaction().rollback();
             } finally {
                 em.close();
             }
@@ -286,7 +290,7 @@ public class PPO {
         JAXBContext jaxbContext;
         com.accumed.pposervice.haad.service.model.Files files = null;
         java.util.List<AccountTransaction> ret = new java.util.ArrayList();
-        java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+        java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("dd/MM/yyyy hh:mm");
         try {
             jaxbContext = JAXBContext.newInstance(com.accumed.pposervice.haad.service.model.Files.class);
 
