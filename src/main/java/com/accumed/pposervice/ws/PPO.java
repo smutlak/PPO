@@ -267,8 +267,7 @@ public class PPO {
         if (trans != null) {
             em = getEMFactory().createEntityManager();
             try {
-                for(AccountTransaction tran: trans)
-                {
+                for (AccountTransaction tran : trans) {
                     tran.setAccount(account);
                     em.persist(tran);
                 }
@@ -284,19 +283,26 @@ public class PPO {
 
     private java.util.List<AccountTransaction> convert(String sXML) {
         JAXBContext jaxbContext;
+        com.accumed.pposervice.haad.service.model.Files files = null;
+        java.util.List<AccountTransaction> ret = new java.util.ArrayList();
         try {
             jaxbContext = JAXBContext.newInstance(com.accumed.pposervice.haad.service.model.Files.class);
 
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-            com.accumed.pposervice.haad.service.model.Files files
-                    = (com.accumed.pposervice.haad.service.model.Files) jaxbUnmarshaller.unmarshal(new StringReader(sXML));
+            files = (com.accumed.pposervice.haad.service.model.Files) jaxbUnmarshaller.unmarshal(new StringReader(sXML));
 
             System.out.println(files);
         } catch (JAXBException e) {
             e.printStackTrace();
         }
-        return null;
+        
+        if (files != null && files.getFile() != null && !files.getFile().isEmpty()) {
+            for(com.accumed.pposervice.haad.service.model.File f: files.getFile()){
+                ret.add(new AccountTransaction(f));
+            }
+        }
+        return ret;
     }
 
     private EntityManagerFactory getEMFactory() {
