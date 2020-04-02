@@ -17,7 +17,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  *
@@ -27,43 +30,53 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "Files")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "fileID",
-    "fileName",
-    "senderID",
-    "receiverID",
-    "transactionDate",
-    "recordCount",
-    "isDownloaded"
+    "fileid",
+    "filename",
+    "senderid",
+    "receiverid",
+    "transactiondate",
+    "recordcount",
+    "isdownloaded",
+    "persist"
 })
 public class AccountTransaction  implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @XmlTransient
     private Long id;
     
     @Column(name = "fileid", nullable = false)
+    @XmlElement(name = "fileid")
     private String fileid;
     
     @Column(name = "filename", nullable = false)
+    @XmlElement(name = "filename")
     private String filename;
     
     @Column(name = "senderid", nullable = false)
+    @XmlElement(name = "senderid")
     private String senderid;
     
     @Column(name = "receiverid", nullable = false)
+    @XmlElement(name = "receiverid")
     private String receiverid;
     
     @Column(name = "transactiondate", nullable = false)
     @Temporal(javax.persistence.TemporalType.DATE)
+    @XmlElement(name = "transactiondate")
     private Date transactiondate;
     
     @Column(name = "recordcount", nullable = false)
+    @XmlElement(name = "recordcount")
     private Integer recordcount;
     
     @Column(name = "isdownloaded", nullable = false)
+    @XmlElement(name = "isdownloaded")
     private Boolean isdownloaded;
     
     @Column(name = "persist", nullable = false)
+    @XmlElement(name = "persist")
     private Boolean persist;
     
     @JoinColumn(name = "account", referencedColumnName = "ID")
