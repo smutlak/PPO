@@ -9,6 +9,7 @@ import com.accumed.pposervice.model.*;
 import com.haad.ClaimSubmission;
 import https.www_shafafiya_org.v2.Webservices;
 import java.io.StringReader;
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
@@ -285,6 +286,7 @@ public class PPO {
         JAXBContext jaxbContext;
         com.accumed.pposervice.haad.service.model.Files files = null;
         java.util.List<AccountTransaction> ret = new java.util.ArrayList();
+        java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
         try {
             jaxbContext = JAXBContext.newInstance(com.accumed.pposervice.haad.service.model.Files.class);
 
@@ -294,12 +296,30 @@ public class PPO {
 
             System.out.println(files);
         } catch (JAXBException e) {
-            e.printStackTrace();
+            Logger.getLogger(PPO.class.getName()).log(Level.SEVERE, null, e);
         }
-        
+
         if (files != null && files.getFile() != null && !files.getFile().isEmpty()) {
-            for(com.accumed.pposervice.haad.service.model.File f: files.getFile()){
-                ret.add(new AccountTransaction(f));
+            for (com.accumed.pposervice.haad.service.model.File f : files.getFile()) {
+                AccountTransaction tran = null;
+                try {
+                    tran = new AccountTransaction();
+                    
+                    tran.setAccount(null);
+                    tran.setPersist(Boolean.FALSE);
+                    tran.setFileid(f.getFileID());
+                    tran.setFilename(f.getFileName());
+                    tran.setSenderid(f.getSenderID());
+                    tran.setReceiverid(f.getReceiverID());
+                    tran.setTransactiondate(formatter.parse(f.getTransactionDate()));
+                    tran.setRecordcount(Integer.parseInt(f.getRecordCount()));
+                    tran.setIsdownloaded(Boolean.parseBoolean(f.getIsDownloaded()));
+                } catch (ParseException ex) {
+                    Logger.getLogger(PPO.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                if(tran != null){
+                    ret.add(tran);
+                }
             }
         }
         return ret;

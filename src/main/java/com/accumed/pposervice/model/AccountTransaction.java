@@ -59,18 +59,6 @@ public class AccountTransaction  implements Serializable {
     public AccountTransaction() {
     }
 
-     public AccountTransaction(com.accumed.pposervice.haad.service.model.File f) {
-         this.fileid = f.getFileID();
-         this.filename = f.getFileName();
-         this.senderid = f.getSenderID();
-         this.receiverid = f.getReceiverID();
-         this.transactiondate = f.getTransactionDate();
-         this.recordcount = f.getRecordCount();
-         this.isdownloaded = f.getIsDownloaded();
-         this.persist = false;
-         this.account = null;
-    }
-    
     public Long getId() {
         return id;
     }
