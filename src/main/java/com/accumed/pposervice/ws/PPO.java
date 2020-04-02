@@ -257,7 +257,7 @@ public class PPO {
         }
         
         if(foundTransactions.value != null && !foundTransactions.value.isEmpty()){
-            
+            List<AccountTransaction> trans = convert(foundTransactions.value);
         }
         
 //        if(searchTransactionsResult != null && searchTransactionsResult.value!=0){
