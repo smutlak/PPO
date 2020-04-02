@@ -8,6 +8,7 @@ package com.accumed.pposervice.ws;
 import com.accumed.pposervice.model.*;
 import com.haad.ClaimSubmission;
 import https.www_shafafiya_org.v2.Webservices;
+import java.io.StringReader;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
@@ -18,6 +19,9 @@ import javax.jws.WebParam;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 /**
  *
@@ -27,7 +31,6 @@ import javax.persistence.Persistence;
 public class PPO {
 
     EntityManagerFactory entityManagerFactory;
-    
 
     @WebMethod(operationName = "getRegulators")
     public java.util.List<Regulator> getRegulators() {
@@ -42,28 +45,28 @@ public class PPO {
         }
         return ret;
     }
-    
-    private https.www_shafafiya_org.v2.WebservicesSoap getWebServicePort(){
+
+    private https.www_shafafiya_org.v2.WebservicesSoap getWebServicePort() {
         Webservices service = new Webservices();
         return service.getWebservicesSoap();
     }
-    
+
     @WebMethod(operationName = "testRegConnection")
     public String testRegConnection(@WebParam(name = "facilityLicense") String facilityLicense,
             @WebParam(name = "regUsr") String regUsr,
-            @WebParam(name = "regPass") String regPass){
-        
+            @WebParam(name = "regPass") String regPass) {
+
         java.util.Date currDate = new java.util.Date();
         java.util.Calendar cal = java.util.Calendar.getInstance();
         cal.setTime(currDate);
         cal.add(java.util.Calendar.DAY_OF_YEAR, -95);
         java.util.Date fromDate = cal.getTime();
         java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-        
+
         javax.xml.ws.Holder<Integer> searchTransactionsResult = new javax.xml.ws.Holder<Integer>();
         javax.xml.ws.Holder<java.lang.String> foundTransactions = new javax.xml.ws.Holder<java.lang.String>();
         javax.xml.ws.Holder<java.lang.String> errorMessage = new javax.xml.ws.Holder<java.lang.String>();
-        
+
         try { // Call Web Service Operation
             https.www_shafafiya_org.v2.WebservicesSoap port = getWebServicePort();
             // TODO initialize WS operation arguments here
@@ -79,20 +82,20 @@ public class PPO {
             java.lang.String transactionToDate = formatter.format(currDate);
             int minRecordCount = -1;
             int maxRecordCount = -1;
-            
+
             port.searchTransactions(login, pwd, direction, callerLicense, ePartner, transactionID, transactionStatus, transactionFileName, transactionFromDate, transactionToDate, minRecordCount, maxRecordCount, searchTransactionsResult, foundTransactions, errorMessage);
         } catch (Exception ex) {
             Logger.getLogger(PPO.class.getName()).log(Level.SEVERE, "Exception caught", ex);
-            ex.printStackTrace();            
+            ex.printStackTrace();
             return ex.getMessage();
         }
-        
-        if(errorMessage.value != null && !errorMessage.value.isEmpty()){
+
+        if (errorMessage.value != null && !errorMessage.value.isEmpty()) {
             return errorMessage.value;
         }
-        
-        if(searchTransactionsResult != null && searchTransactionsResult.value!=0){
-            return "searchTransactionsResult returned="+searchTransactionsResult.value;
+
+        if (searchTransactionsResult != null && searchTransactionsResult.value != 0) {
+            return "searchTransactionsResult returned=" + searchTransactionsResult.value;
         }
 
         return "";
@@ -151,7 +154,7 @@ public class PPO {
         } finally {
             em.close();
         }
-        return account==null?-1L:account.getId();
+        return account == null ? -1L : account.getId();
     }
 
     @WebMethod(operationName = "readClaimSubmission")
@@ -175,13 +178,13 @@ public class PPO {
         } finally {
             em.close();
         }
-        
+
         return true;
     }
-    
+
     @WebMethod(operationName = "ProcessPendingTransactions")
-    public Boolean ProcessPendingTransactions(){
-        
+    public Boolean ProcessPendingTransactions() {
+
         //get top facility
         //get top facility last job info
         //call ppo for remaining transactions
@@ -198,37 +201,37 @@ public class PPO {
         } finally {
             em.close();
         }
-    */
+         */
         return true;
     }
-    
+
     @WebMethod(operationName = "getFacilityMonthTransaction")
-    public Boolean getFacilityMonthTransaction(@WebParam(name = "accountId") Long accountId){
-        Account account =null;
-        
+    public java.util.List<AccountTransaction> getFacilityMonthTransaction(@WebParam(name = "accountId") Long accountId) {
+        Account account = null;
+
         EntityManager em = getEMFactory().createEntityManager();
         try {
-           account = (Account)em.createNamedQuery("Account.findById").setParameter("id", accountId).getSingleResult();
+            account = (Account) em.createNamedQuery("Account.findById").setParameter("id", accountId).getSingleResult();
         } catch (Exception e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
         } finally {
             em.close();
         }
-        
-        if(account == null){
-            return false;
+
+        if (account == null) {
+            return null;
         }
-        
+
         Date currDate = new Date();
         Calendar c = Calendar.getInstance();   // this takes current date
         c.set(Calendar.DAY_OF_MONTH, 1);
         Date fromDate = c.getTime();
         java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-        
+
         javax.xml.ws.Holder<Integer> searchTransactionsResult = new javax.xml.ws.Holder<Integer>();
         javax.xml.ws.Holder<java.lang.String> foundTransactions = new javax.xml.ws.Holder<java.lang.String>();
         javax.xml.ws.Holder<java.lang.String> errorMessage = new javax.xml.ws.Holder<java.lang.String>();
-        
+
         try { // Call Web Service Operation
             https.www_shafafiya_org.v2.WebservicesSoap port = getWebServicePort();
             // TODO initialize WS operation arguments here
@@ -244,35 +247,60 @@ public class PPO {
             java.lang.String transactionToDate = formatter.format(currDate);
             int minRecordCount = -1;
             int maxRecordCount = -1;
-            
+
             port.searchTransactions(login, pwd, direction, callerLicense, ePartner, transactionID, transactionStatus, transactionFileName, transactionFromDate, transactionToDate, minRecordCount, maxRecordCount, searchTransactionsResult, foundTransactions, errorMessage);
         } catch (Exception ex) {
             Logger.getLogger(PPO.class.getName()).log(Level.SEVERE, "Exception caught", ex);
-            ex.printStackTrace();            
-            return false;
+            ex.printStackTrace();
+            return null;
         }
-        
-        if(errorMessage.value != null && !errorMessage.value.isEmpty()){
-            return false;
+
+        if (errorMessage.value != null && !errorMessage.value.isEmpty()) {
+            return null;
         }
-        
-        if(foundTransactions.value != null && !foundTransactions.value.isEmpty()){
-            List<AccountTransaction> trans = convert(foundTransactions.value);
+
+        java.util.List<AccountTransaction> trans = null;
+        if (foundTransactions.value != null && !foundTransactions.value.isEmpty()) {
+            trans = convert(foundTransactions.value);
         }
-        
-//        if(searchTransactionsResult != null && searchTransactionsResult.value!=0){
-//            return "searchTransactionsResult returned="+searchTransactionsResult.value;
-//        }
 
+        if (trans != null) {
+            em = getEMFactory().createEntityManager();
+            try {
+                for(AccountTransaction tran: trans)
+                {
+                    tran.setAccount(account);
+                    em.persist(tran);
+                }
+            } catch (Exception e) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+            } finally {
+                em.close();
+            }
+        }
 
-
-        return true;
+        return trans;
     }
-    
+
+    private java.util.List<AccountTransaction> convert(String sXML) {
+        JAXBContext jaxbContext;
+        try {
+            jaxbContext = JAXBContext.newInstance(com.accumed.pposervice.haad.service.model.Files.class);
+
+            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+
+            com.accumed.pposervice.haad.service.model.Files files
+                    = (com.accumed.pposervice.haad.service.model.Files) jaxbUnmarshaller.unmarshal(new StringReader(sXML));
+
+            System.out.println(files);
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     private EntityManagerFactory getEMFactory() {
         return entityManagerFactory != null ? entityManagerFactory : Persistence.createEntityManagerFactory("PPOServicePU");
     }
-    
-    
+
 }
