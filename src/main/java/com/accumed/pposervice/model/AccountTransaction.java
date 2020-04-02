@@ -81,6 +81,7 @@ public class AccountTransaction  implements Serializable {
     
     @JoinColumn(name = "account", referencedColumnName = "ID")
     @ManyToOne
+    @XmlTransient
     private Account account;
 
     public AccountTransaction() {
