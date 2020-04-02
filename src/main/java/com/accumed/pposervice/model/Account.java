@@ -58,6 +58,9 @@ public class Account implements Serializable {
     @OneToMany(mappedBy = "account", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     private List<POJob> jobs;
     
+    @OneToMany(mappedBy = "account", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    private List<AccountTransaction> accountTransactions;
+    
     public Long getId() {
         return id;
     }
@@ -145,6 +148,14 @@ public class Account implements Serializable {
 
     public void setJobs(List<POJob> jobs) {
         this.jobs = jobs;
+    }
+
+    public List<AccountTransaction> getAccountTransactions() {
+        return accountTransactions;
+    }
+
+    public void setAccountTransactions(List<AccountTransaction> accountTransactions) {
+        this.accountTransactions = accountTransactions;
     }
     
     

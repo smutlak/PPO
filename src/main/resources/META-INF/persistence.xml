@@ -4,6 +4,7 @@
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
     <non-jta-data-source>java:comp/env/jdbc/PPODS</non-jta-data-source>
     <class>com.accumed.pposervice.model.Account</class>
+    <class>com.accumed.pposervice.model.AccountTransaction</class>
     <class>com.accumed.pposervice.model.RegLoginDetails</class>
     <class>com.accumed.pposervice.model.Regulator</class>
     <class>com.accumed.pposervice.model.POJob</class>
