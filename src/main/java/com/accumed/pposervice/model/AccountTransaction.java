@@ -15,12 +15,26 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author smutlak
  */
 @Entity
+@XmlRootElement(name = "Files")
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "", propOrder = {
+    "fileID",
+    "fileName",
+    "senderID",
+    "receiverID",
+    "transactionDate",
+    "recordCount",
+    "isDownloaded"
+})
 public class AccountTransaction  implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
