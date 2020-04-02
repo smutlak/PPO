@@ -8,6 +8,8 @@ package com.accumed.pposervice.ws;
 import com.accumed.pposervice.model.*;
 import com.haad.ClaimSubmission;
 import https.www_shafafiya_org.v2.Webservices;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jws.WebService;
@@ -202,24 +204,25 @@ public class PPO {
     
     @WebMethod(operationName = "getFacilityMonthTransaction")
     public Boolean getFacilityMonthTransaction(@WebParam(name = "accountId") Long accountId){
+        Account account =null;
         
         EntityManager em = getEMFactory().createEntityManager();
         try {
-           Account account = (Account)em.createNamedQuery("Account.findAll").setParameter("id", accountId).getSingleResult();
+           account = (Account)em.createNamedQuery("Account.findById").setParameter("id", accountId).getSingleResult();
         } catch (Exception e) {
-            em.getTransaction().rollback();
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
         } finally {
             em.close();
         }
-        /*
-        return true;
         
-        java.util.Date currDate = new java.util.Date();
-        java.util.Calendar cal = java.util.Calendar.getInstance();
-        cal.setTime(currDate);
-        cal.add(java.util.Calendar.DAY_OF_YEAR, -95);
-        java.util.Date fromDate = cal.getTime();
+        if(account == null){
+            return false;
+        }
+        
+        Date currDate = new Date();
+        Calendar c = Calendar.getInstance();   // this takes current date
+        c.set(Calendar.DAY_OF_MONTH, 1);
+        Date fromDate = c.getTime();
         java.text.SimpleDateFormat formatter = new java.text.SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
         
         javax.xml.ws.Holder<Integer> searchTransactionsResult = new javax.xml.ws.Holder<Integer>();
@@ -229,10 +232,10 @@ public class PPO {
         try { // Call Web Service Operation
             https.www_shafafiya_org.v2.WebservicesSoap port = getWebServicePort();
             // TODO initialize WS operation arguments here
-            java.lang.String login = regUsr;
-            java.lang.String pwd = regPass;
+            java.lang.String login = account.getRegLoginDetails().getUsr();
+            java.lang.String pwd = account.getRegLoginDetails().getPass();
             int direction = 1;
-            java.lang.String callerLicense = facilityLicense;
+            java.lang.String callerLicense = account.getRegLoginDetails().getFacilityLicense();
             java.lang.String ePartner = null;
             int transactionID = 2;
             int transactionStatus = 2;
@@ -246,19 +249,18 @@ public class PPO {
         } catch (Exception ex) {
             Logger.getLogger(PPO.class.getName()).log(Level.SEVERE, "Exception caught", ex);
             ex.printStackTrace();            
-            return ex.getMessage();
+            return false;
         }
         
         if(errorMessage.value != null && !errorMessage.value.isEmpty()){
-            return errorMessage.value;
+            return false;
         }
         
-        if(searchTransactionsResult != null && searchTransactionsResult.value!=0){
-            return "searchTransactionsResult returned="+searchTransactionsResult.value;
-        }
+//        if(searchTransactionsResult != null && searchTransactionsResult.value!=0){
+//            return "searchTransactionsResult returned="+searchTransactionsResult.value;
+//        }
 
-        return "";*/
-        return false;
+        return true;
     }
     
 
