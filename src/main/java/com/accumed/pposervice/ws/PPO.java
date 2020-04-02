@@ -256,6 +256,10 @@ public class PPO {
             return false;
         }
         
+        if(foundTransactions.value != null && !foundTransactions.value.isEmpty()){
+            
+        }
+        
 //        if(searchTransactionsResult != null && searchTransactionsResult.value!=0){
 //            return "searchTransactionsResult returned="+searchTransactionsResult.value;
 //        }
