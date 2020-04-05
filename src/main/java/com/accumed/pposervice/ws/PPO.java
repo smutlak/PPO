@@ -433,7 +433,7 @@ public class PPO {
                 em.getTransaction().begin();
                 for (AccountTransaction tran : trans) {
                     tran.setAccount(account);
-                    em.persist(account);
+                    em.persist(tran);
                 }
                 em.getTransaction().commit();
                 //start processing pending transactions
