@@ -8,8 +8,13 @@ package com.accumed.pposervice.ws;
 import com.accumed.pposervice.model.*;
 import com.haad.ClaimSubmission;
 import https.www_shafafiya_org.v2.Webservices;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
@@ -19,6 +24,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -186,7 +193,7 @@ public class PPO {
     public String downloadClaimSubmissionFile(@WebParam(name = "accountId") Long accountId,
             @WebParam(name = "fileId") String fileId) {
 
-        String sFileName ="";
+        String sFileName = "";
         Account account = null;
 
         EntityManager em = getEMFactory().createEntityManager();
@@ -220,6 +227,25 @@ public class PPO {
                 FileOutputStream fos = new FileOutputStream(sFileName);
                 fos.write(file.value);
                 fos.close();
+
+                if (fileName.value.endsWith(".zip")) {
+                    String sTargetDir = TMP_DIR + java.io.File.separator + "extracted";
+                    unzip(sFileName, sTargetDir);
+                    File fTargetDir = new File(sTargetDir);
+                    if (fTargetDir.listFiles().length < 0 || fTargetDir.listFiles().length > 1) {
+                        Logger.getLogger(PPO.class.getName()).log(Level.SEVERE, "Error",
+                                "Extracted File cntains no files OR more than one file" + fTargetDir);
+                        return "";
+                    } else {
+                        String fileNameNoExt = fileName.value.substring(0, fileName.value.lastIndexOf('.'));
+                        String sTargetFileName = TMP_DIR + java.io.File.separator + fileNameNoExt +"xml";
+                        Files.copy(fTargetDir.listFiles()[0].toPath(), new File(sTargetFileName).toPath(),
+                                StandardCopyOption.REPLACE_EXISTING);
+                        //delete extraction dir
+                        //delete zip file
+                    }
+                }
+
             }
 
         } catch (Exception ex) {
@@ -441,7 +467,6 @@ public class PPO {
                 ProcessPendingTransactionsListThread processPendingTransactionsListThread
                         = new ProcessPendingTransactionsListThread(account);
                 ProcessPendingTransactionsListFixedPool.submit(processPendingTransactionsListThread);
-                //Loop in Transaction List for each one download/uncompress/parse/persist
             } catch (Exception e) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
                 if (em != null) {
@@ -498,5 +523,44 @@ public class PPO {
                 }
             }
         }
+    }
+
+    private static void unzip(String zipFilePath, String destDir) {
+        File dir = new File(destDir);
+        // create output directory if it doesn't exist
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        FileInputStream fis;
+        //buffer for read and write data to file
+        byte[] buffer = new byte[1024];
+        try {
+            fis = new FileInputStream(zipFilePath);
+            ZipInputStream zis = new ZipInputStream(fis);
+            ZipEntry ze = zis.getNextEntry();
+            while (ze != null) {
+                String fileName = ze.getName();
+                File newFile = new File(destDir + File.separator + fileName);
+                System.out.println("Unzipping to " + newFile.getAbsolutePath());
+                //create directories for sub directories in zip
+                new File(newFile.getParent()).mkdirs();
+                FileOutputStream fos = new FileOutputStream(newFile);
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+                fos.close();
+                //close this ZipEntry
+                zis.closeEntry();
+                ze = zis.getNextEntry();
+            }
+            //close last ZipEntry
+            zis.closeEntry();
+            zis.close();
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
