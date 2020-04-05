@@ -183,7 +183,7 @@ public class PPO {
     }
 
     @WebMethod(operationName = "downloadClaimSubmissionFile")
-    public String readClaimSubmission(@WebParam(name = "accountId") Long accountId,
+    public String downloadClaimSubmissionFile(@WebParam(name = "accountId") Long accountId,
             @WebParam(name = "fileId") String fileId) {
 
         String sFileName ="";
@@ -433,7 +433,7 @@ public class PPO {
                 em.getTransaction().begin();
                 for (AccountTransaction tran : trans) {
                     tran.setAccount(account);
-                    em.persist(tran);
+                    em.merge(tran);
                 }
                 em.getTransaction().commit();
                 //start processing pending transactions
