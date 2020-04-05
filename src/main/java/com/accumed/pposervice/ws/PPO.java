@@ -8,10 +8,15 @@ package com.accumed.pposervice.ws;
 import com.accumed.pposervice.model.*;
 import com.haad.ClaimSubmission;
 import https.www_shafafiya_org.v2.Webservices;
+import java.io.FileOutputStream;
 import java.io.StringReader;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jws.WebService;
@@ -32,6 +37,20 @@ import javax.xml.bind.Unmarshaller;
 public class PPO {
 
     EntityManagerFactory entityManagerFactory;
+
+    static final AtomicLong PersistPendingTransactionsListThread_NEXT_ID = new AtomicLong(0);
+    public static ThreadPoolExecutor PersistPendingTransactionsListFixedPool
+            = //(ThreadPoolExecutor)Executors.newFixedThreadPool(1);
+            new ThreadPoolExecutor(0, 3,
+                    0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<Runnable>());
+
+    static final AtomicLong ProcessPendingTransactionsListThread_NEXT_ID = new AtomicLong(0);
+    public static ThreadPoolExecutor ProcessPendingTransactionsListFixedPool
+            = //(ThreadPoolExecutor)Executors.newFixedThreadPool(1);
+            new ThreadPoolExecutor(0, 3,
+                    0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<Runnable>());
 
     @WebMethod(operationName = "getRegulators")
     public java.util.List<Regulator> getRegulators() {
@@ -155,16 +174,69 @@ public class PPO {
         } finally {
             em.close();
         }
+
+        PersistPendingTransactionsListThread persistPendingTransactionsListThread
+                = new PersistPendingTransactionsListThread(account);
+        PersistPendingTransactionsListFixedPool.submit(persistPendingTransactionsListThread);
+
         return account == null ? -1L : account.getId();
     }
 
-    @WebMethod(operationName = "readClaimSubmission")
-    public ClaimSubmission readClaimSubmission(@WebParam(name = "fileName") String fileName) {
+    @WebMethod(operationName = "downloadClaimSubmissionFile")
+    public String readClaimSubmission(@WebParam(name = "accountId") Long accountId,
+            @WebParam(name = "fileId") String fileId) {
+
+        String sFileName ="";
+        Account account = null;
+
+        EntityManager em = getEMFactory().createEntityManager();
+        try {
+            account = (Account) em.createNamedQuery("Account.findById").setParameter("id", accountId).getSingleResult();
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+        } finally {
+            em.close();
+        }
+
+        if (account == null) {
+            return null;
+        }
+
+        try { // Call Web Service Operation
+            https.www_shafafiya_org.v2.WebservicesSoap port = getWebServicePort();
+            // TODO initialize WS operation arguments here
+            java.lang.String login = account.getRegLoginDetails().getUsr();
+            java.lang.String pwd = account.getRegLoginDetails().getPass();
+            java.lang.String fileId1 = fileId;
+            javax.xml.ws.Holder<Integer> downloadTransactionFileResult = new javax.xml.ws.Holder<Integer>();
+            javax.xml.ws.Holder<java.lang.String> fileName = new javax.xml.ws.Holder<java.lang.String>();
+            javax.xml.ws.Holder<byte[]> file = new javax.xml.ws.Holder<byte[]>();
+            javax.xml.ws.Holder<java.lang.String> errorMessage = new javax.xml.ws.Holder<java.lang.String>();
+            port.downloadTransactionFile(login, pwd, fileId1, downloadTransactionFileResult, fileName, file, errorMessage);
+            if (downloadTransactionFileResult != null && downloadTransactionFileResult.value != null && downloadTransactionFileResult.value == 0) {
+                //save file
+                String TMP_DIR = System.getProperty("java.io.tmpdir");
+                sFileName = TMP_DIR + java.io.File.separator + fileName.value;
+                FileOutputStream fos = new FileOutputStream(sFileName);
+                fos.write(file.value);
+                fos.close();
+            }
+
+        } catch (Exception ex) {
+            Logger.getLogger(PPO.class.getName()).log(Level.SEVERE, "Exception caught", ex);
+            ex.printStackTrace();
+            return null;
+        }
+        return sFileName;
+    }
+
+    @WebMethod(operationName = "readClaimSubmissionFile")
+    public ClaimSubmission readClaimSubmissionFile(@WebParam(name = "fileName") String fileName) {
         return ClaimsReader.ReadXML(fileName);
     }
 
-    @WebMethod(operationName = "saveClaimSubmission")
-    public Boolean saveClaimSubmission(@WebParam(name = "fileName") String fileName) {
+    @WebMethod(operationName = "saveClaimSubmissionFile")
+    public Boolean saveClaimSubmissionFile(@WebParam(name = "fileName") String fileName) {
         ClaimSubmission claimSubmission = ClaimsReader.ReadXML(fileName);
         claimSubmission = Utils.setParents(claimSubmission);
 
@@ -267,7 +339,7 @@ public class PPO {
 
         if (trans != null) {
             em = getEMFactory().createEntityManager();
-            
+
             try {
                 em.getTransaction().begin();
                 for (AccountTransaction tran : trans) {
@@ -308,7 +380,7 @@ public class PPO {
                 AccountTransaction tran = null;
                 try {
                     tran = new AccountTransaction();
-                    
+
                     tran.setAccount(null);
                     tran.setPersist(Boolean.FALSE);
                     tran.setFileid(f.getFileID());
@@ -321,7 +393,7 @@ public class PPO {
                 } catch (ParseException ex) {
                     Logger.getLogger(PPO.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                if(tran != null){
+                if (tran != null) {
                     ret.add(tran);
                 }
             }
@@ -333,4 +405,97 @@ public class PPO {
         return entityManagerFactory != null ? entityManagerFactory : Persistence.createEntityManagerFactory("PPOServicePU");
     }
 
+    protected class PersistPendingTransactionsListThread implements Runnable {
+
+        private Account account;
+//        private com.accumed.model.scrubRequest.ScrubRequest req = null;
+        final long PROCESS_PENDING_TRANSACTIONS_THREAD_UNIQUE_ID = PersistPendingTransactionsListThread_NEXT_ID.getAndIncrement();
+
+        public PersistPendingTransactionsListThread(Account account) {
+            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+            this.account = account;
+        }
+
+        @Override
+        public void run() {
+            EntityManager em = null;
+            Logger.getLogger(PersistPendingTransactionsListThread.class.getName()).
+                    log(Level.INFO, "PersistPendingTransactionsListThread started '{'{0}'}'{1}",
+                            new Object[]{PROCESS_PENDING_TRANSACTIONS_THREAD_UNIQUE_ID,
+                                account != null
+                                        ? account.getId() + " " + account.getEmail()
+                                        : "account is null"});
+            try {
+                //getPendingTransactionsList
+                em = getEMFactory().createEntityManager();
+                java.util.List<AccountTransaction> trans = getFacilityMonthTransaction(account.getId());
+                //Persist Transactions List
+                em.getTransaction().begin();
+                for (AccountTransaction tran : trans) {
+                    tran.setAccount(account);
+                    em.persist(account);
+                }
+                em.getTransaction().commit();
+                //start processing pending transactions
+                ProcessPendingTransactionsListThread processPendingTransactionsListThread
+                        = new ProcessPendingTransactionsListThread(account);
+                ProcessPendingTransactionsListFixedPool.submit(processPendingTransactionsListThread);
+                //Loop in Transaction List for each one download/uncompress/parse/persist
+            } catch (Exception e) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+                if (em != null) {
+                    if (em.getTransaction().isActive()) {
+                        em.getTransaction().rollback();
+                    }
+                    em.close();
+                    em = null;
+                }
+            } finally {
+                if (em != null) {
+                    em.close();
+                    em = null;
+                }
+            }
+        }
+    }
+
+    protected class ProcessPendingTransactionsListThread implements Runnable {
+
+        private Account account;
+//        private com.accumed.model.scrubRequest.ScrubRequest req = null;
+        final long PROCESS_PENDING_TRANSACTIONS_THREAD_UNIQUE_ID = ProcessPendingTransactionsListThread_NEXT_ID.getAndIncrement();
+
+        public ProcessPendingTransactionsListThread(Account account) {
+            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+            this.account = account;
+        }
+
+        @Override
+        public void run() {
+            EntityManager em = null;
+            Logger.getLogger(ProcessPendingTransactionsListThread.class.getName()).
+                    log(Level.INFO, "ProcessPendingTransactionsListThread started '{'{0}'}'{1}",
+                            new Object[]{PROCESS_PENDING_TRANSACTIONS_THREAD_UNIQUE_ID,
+                                account != null
+                                        ? account.getId() + " " + account.getEmail()
+                                        : "account is null"});
+            try {
+                //Loop in Transaction List for each one download/uncompress/parse/persist
+            } catch (Exception e) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+                if (em != null) {
+                    if (em.getTransaction().isActive()) {
+                        em.getTransaction().rollback();
+                    }
+                    em.close();
+                    em = null;
+                }
+            } finally {
+                if (em != null) {
+                    em.close();
+                    em = null;
+                }
+            }
+        }
+    }
 }
