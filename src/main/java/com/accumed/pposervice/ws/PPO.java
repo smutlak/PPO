@@ -19,6 +19,7 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -26,6 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javax.annotation.PostConstruct;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -46,6 +48,8 @@ public class PPO {
 
     EntityManagerFactory entityManagerFactory;
 
+    private static ScheduledThreadPoolExecutor executor = null;
+
     static final AtomicLong PersistPendingTransactionsListThread_NEXT_ID = new AtomicLong(0);
     public static ThreadPoolExecutor PersistPendingTransactionsListFixedPool
             = //(ThreadPoolExecutor)Executors.newFixedThreadPool(1);
@@ -56,11 +60,23 @@ public class PPO {
     static final AtomicLong ProcessPendingTransactionsListThread_NEXT_ID = new AtomicLong(0);
     public static ThreadPoolExecutor ProcessPendingTransactionsListFixedPool
             = //(ThreadPoolExecutor)Executors.newFixedThreadPool(1);
-            new ThreadPoolExecutor(0, 3,
+            new ThreadPoolExecutor(0, 1,
                     0L, TimeUnit.MILLISECONDS,
                     new LinkedBlockingQueue<Runnable>());
 
     static final AtomicLong extractionFolder_NEXT_ID = new AtomicLong(0);
+    
+    
+    @PostConstruct
+    public void init() {
+        Logger.getLogger(PPO.class.getName()).log(Level.INFO,
+                "init()", "PPO service init method.");
+        executor = new ScheduledThreadPoolExecutor(2);
+        executor.scheduleWithFixedDelay(new AccountTransactionsService(),
+                120, 60 * 60, TimeUnit.SECONDS); //for account checking new transactions
+        executor.scheduleWithFixedDelay(new TransactionDownloadService(),
+                150, 1 * 60, TimeUnit.SECONDS); //for downloading transactions
+    }
 
     @WebMethod(operationName = "getRegulators")
     public java.util.List<Regulator> getRegulators() {
@@ -522,11 +538,14 @@ public class PPO {
                 //getPendingTransactionsList
                 em = getEMFactory().createEntityManager();
                 java.util.List<AccountTransaction> trans = getFacilityMonthTransaction(account.getId());
+//Sameer                trans = removeAlreadyExistedTransactions(trans);
                 //Persist Transactions List
                 em.getTransaction().begin();
+
                 for (AccountTransaction tran : trans) {
                     tran.setAccount(account);
                     em.merge(tran);
+
                 }
                 em.getTransaction().commit();
                 //start processing pending transactions
@@ -661,5 +680,42 @@ public class PPO {
             e.printStackTrace();
         }
 
+    }
+
+    protected class AccountTransactionsService implements Runnable {
+
+        public AccountTransactionsService() {
+
+        }
+
+        @Override
+        public void run() {
+            try {
+                Logger.getLogger(AccountTransactionsService.class.getName()).log(Level.INFO, "AccountTransactionsService task running at {0}", new Date());
+
+            } catch (Throwable e) {
+                //Logger.getLogger(CachedRepositoryService.class.getName()).log(Level.SEVERE, "Exception={0}\nMessage={1}\nLocalizedMessage={2}\nCause={3}", new Object[]{e.toString(), e.getMessage(), e.getLocalizedMessage(), e.getCause().toString()});
+                Logger.getLogger(AccountTransactionsService.class.getName()).log(Level.SEVERE, "wsdsda");
+            }
+        }
+
+    }
+
+    protected class TransactionDownloadService implements Runnable {
+
+        public TransactionDownloadService() {
+
+        }
+
+        @Override
+        public void run() {
+            try {
+                Logger.getLogger(TransactionDownloadService.class.getName()).log(Level.INFO, "TransactionDownloadService task running at {0}", new Date());
+
+            } catch (Throwable e) {
+                //Logger.getLogger(CachedRepositoryService.class.getName()).log(Level.SEVERE, "Exception={0}\nMessage={1}\nLocalizedMessage={2}\nCause={3}", new Object[]{e.toString(), e.getMessage(), e.getLocalizedMessage(), e.getCause().toString()});
+                Logger.getLogger(TransactionDownloadService.class.getName()).log(Level.SEVERE, "wsdsda");
+            }
+        }
     }
 }
