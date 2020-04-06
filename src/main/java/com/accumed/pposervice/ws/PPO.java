@@ -229,9 +229,10 @@ public class PPO {
                 fos.close();
 
                 if (fileName.value.endsWith(".zip")) {
-                    String sTargetDir = TMP_DIR + java.io.File.separator + "extracted";
+                    String sTargetDir = TMP_DIR + java.io.File.separator + "extracted" + java.io.File.separator;
+                    File fTargetDir= new File(sTargetDir);
+                    fTargetDir.mkdirs();
                     unzip(sFileName, sTargetDir);
-                    File fTargetDir = new File(sTargetDir);
                     if (fTargetDir.listFiles().length < 0 || fTargetDir.listFiles().length > 1) {
                         Logger.getLogger(PPO.class.getName()).log(Level.SEVERE, "Error",
                                 "Extracted File cntains no files OR more than one file" + fTargetDir);
@@ -242,7 +243,9 @@ public class PPO {
                         Files.copy(fTargetDir.listFiles()[0].toPath(), new File(sTargetFileName).toPath(),
                                 StandardCopyOption.REPLACE_EXISTING);
                         //delete extraction dir
+                        deleteRecursive(fTargetDir);
                         //delete zip file
+                        new File(sFileName).delete();
                     }
                 }
 
@@ -255,6 +258,25 @@ public class PPO {
         }
         //TestChanges1
         return sFileName;
+    }
+    
+    private void deleteRecursive(File path) {
+        File[] c = path.listFiles();
+        Logger.getLogger(PPO.class.getName()).log(Level.INFO,
+                    "DocuNetWeb deleteRecursive", "Cleaning out folder:" + path.toString());
+        System.out.println("Cleaning out folder:" + path.toString());
+        for (File file : c) {
+            if (file.isDirectory()) {
+                Logger.getLogger(PPO.class.getName()).log(Level.INFO,
+                    "DocuNetWeb deleteRecursive", "Deleting file:" + file.toString());
+                System.out.println("Deleting file:" + file.toString());
+                deleteRecursive(file);
+                file.delete();
+            } else {
+                file.delete();
+            }
+        }
+        path.delete();
     }
 
     @WebMethod(operationName = "readClaimSubmissionFile")
