@@ -538,7 +538,15 @@ public class PPO {
                 Query q = em.createNamedQuery("AccountTransaction.findFirstUnprocessed");
                 q.setMaxResults(1);
                 AccountTransaction trans = (AccountTransaction) q.getResultList();
+
                 if (trans != null) {
+
+                    Logger.getLogger(ProcessPendingTransactionsListThread.class.getName()).
+                            log(Level.INFO, "ProcessPendingTransactionsListThread started "
+                                    + PROCESS_PENDING_TRANSACTIONS_THREAD_UNIQUE_ID + account != null
+                                            ? account.getId() + " " + account.getEmail()
+                                            : "account is null" + " fileId = " + trans.getFileid());
+
                     //download
                     String sXmlFile = downloadClaimSubmissionFile(account.getId(), trans.getFileid());
                     File fXmlFile = new File(sXmlFile);
