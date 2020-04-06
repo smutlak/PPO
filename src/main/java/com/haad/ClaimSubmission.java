@@ -8,6 +8,8 @@
 
 package com.haad;
 
+import com.accumed.pposervice.model.Account;
+import com.accumed.pposervice.model.AccountTransaction;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -211,6 +214,11 @@ public class ClaimSubmission implements Serializable{
     @OneToMany(mappedBy = "claimSubmission", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     @XmlElement(name = "Claim", required = true)
     protected List<Claim> claim;
+    
+    @JoinColumn(name = "accountTransaction", referencedColumnName = "ID")
+    @OneToOne
+    @XmlTransient 
+    private AccountTransaction accountTransaction;
 
     /**
      * Gets the value of the header property.
@@ -272,7 +280,12 @@ public class ClaimSubmission implements Serializable{
     public void setId(Long id) {
         this.id = id;
     }
-    
-    
 
+    public AccountTransaction getAccountTransaction() {
+        return accountTransaction;
+    }
+
+    public void setAccountTransaction(AccountTransaction accountTransaction) {
+        this.accountTransaction = accountTransaction;
+    }
 }

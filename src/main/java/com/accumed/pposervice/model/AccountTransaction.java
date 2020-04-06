@@ -5,15 +5,23 @@
  */
 package com.accumed.pposervice.model;
 
+import com.haad.ClaimSubmission;
 import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -27,6 +35,16 @@ import javax.xml.bind.annotation.XmlType;
  * @author smutlak
  */
 @Entity
+@Table(
+    name="accounttransaction", 
+    indexes = {
+       @Index(name = "accounttransaction_INDX_0", columnList = "transactiondate"),
+       @Index(name = "accounttransaction_INDX_1", columnList = "senderid"),
+       @Index(name = "accounttransaction_INDX_2", columnList = "receiverid")  })
+@NamedQueries({
+    @NamedQuery(name = "AccountTransaction.findAll", query = "SELECT a FROM AccountTransaction a"),
+    @NamedQuery(name = "AccountTransaction.findById", query = "SELECT a FROM AccountTransaction a WHERE a.id = :id"),
+    @NamedQuery(name = "AccountTransaction.findFirstUnprocessed", query = "SELECT a FROM AccountTransaction a WHERE a.id = :id order by a.transactiondate desc")})
 @XmlRootElement(name = "Files")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -83,6 +101,10 @@ public class AccountTransaction  implements Serializable {
     @ManyToOne
     @XmlTransient
     private Account account;
+    
+    @OneToOne(mappedBy = "accountTransaction", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @XmlTransient 
+    private ClaimSubmission claimsubmission;
 
     public AccountTransaction() {
     }
@@ -165,6 +187,14 @@ public class AccountTransaction  implements Serializable {
 
     public void setAccount(Account account) {
         this.account = account;
+    }
+
+    public ClaimSubmission getClaimsubmission() {
+        return claimsubmission;
+    }
+
+    public void setClaimsubmission(ClaimSubmission claimsubmission) {
+        this.claimsubmission = claimsubmission;
     }
     
     

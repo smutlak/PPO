@@ -32,6 +32,7 @@ import javax.jws.WebParam;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.Query;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -532,7 +533,31 @@ public class PPO {
                                         ? account.getId() + " " + account.getEmail()
                                         : "account is null"});
             try {
-                //Loop in Transaction List for each one download/uncompress/parse/persist
+                em = getEMFactory().createEntityManager();
+                //get first unprocessed transaction according to date/download/parse/save
+                Query q = em.createNamedQuery("AccountTransaction.findFirstUnprocessed");
+                q.setMaxResults(1);
+                AccountTransaction trans = (AccountTransaction) q.getResultList();
+                if (trans != null) {
+                    //download
+                    String sXmlFile = downloadClaimSubmissionFile(account.getId(), trans.getFileid());
+                    File fXmlFile = new File(sXmlFile);
+                    if (fXmlFile.exists()) {
+                        //parse
+                        ClaimSubmission submission = ClaimsReader.ReadXML(sXmlFile);
+                        //save
+                        submission = Utils.setParents(submission);
+                        submission.setAccountTransaction(trans);
+                        trans.setPersist(Boolean.TRUE);
+                        em.getTransaction().begin();
+                        em.merge(submission);
+                        em.getTransaction().commit();
+                    } else {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE,
+                                "Error", "File Not Exist:" + sXmlFile);
+                    }
+                }
+
             } catch (Exception e) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
                 if (em != null) {
