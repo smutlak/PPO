@@ -36,15 +36,19 @@ import javax.xml.bind.annotation.XmlType;
  */
 @Entity
 @Table(
-    name="accounttransaction", 
-    indexes = {
-       @Index(name = "accounttransaction_INDX_0", columnList = "transactiondate"),
-       @Index(name = "accounttransaction_INDX_1", columnList = "senderid"),
-       @Index(name = "accounttransaction_INDX_2", columnList = "receiverid")  })
+        name = "accounttransaction",
+        indexes = {
+            @Index(name = "accounttransaction_INDX_0", columnList = "transactiondate"),
+            @Index(name = "accounttransaction_INDX_1", columnList = "senderid"),
+            @Index(name = "accounttransaction_INDX_2", columnList = "receiverid"),
+            @Index(name = "accounttransaction_INDX_3", columnList = "persist")})
 @NamedQueries({
     @NamedQuery(name = "AccountTransaction.findAll", query = "SELECT a FROM AccountTransaction a"),
     @NamedQuery(name = "AccountTransaction.findById", query = "SELECT a FROM AccountTransaction a WHERE a.id = :id"),
-    @NamedQuery(name = "AccountTransaction.findFirstUnprocessed", query = "SELECT a FROM AccountTransaction a WHERE a.id = :id order by a.transactiondate desc")})
+    @NamedQuery(name = "AccountTransaction.findFirstUnprocessed", query = "SELECT a FROM AccountTransaction a WHERE a.id = :id order by a.transactiondate desc"),
+    @NamedQuery(name = "AccountTransaction.getCountByAccountId", query = "SELECT COUNT(*) FROM AccountTransaction a WHERE a.account = :account"),
+    @NamedQuery(name = "AccountTransaction.getPersistedCountByAccountId", query = "SELECT a FROM AccountTransaction a WHERE a.account = :account AND a.persist=TRUE")})
+
 @XmlRootElement(name = "Files")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -57,53 +61,54 @@ import javax.xml.bind.annotation.XmlType;
     "isdownloaded",
     "persist"
 })
-public class AccountTransaction  implements Serializable {
+public class AccountTransaction implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @XmlTransient
     private Long id;
-    
+
     @Column(name = "fileid", nullable = false)
     @XmlElement(name = "fileid")
     private String fileid;
-    
+
     @Column(name = "filename", nullable = false)
     @XmlElement(name = "filename")
     private String filename;
-    
+
     @Column(name = "senderid", nullable = false)
     @XmlElement(name = "senderid")
     private String senderid;
-    
+
     @Column(name = "receiverid", nullable = false)
     @XmlElement(name = "receiverid")
     private String receiverid;
-    
+
     @Column(name = "transactiondate", nullable = false)
     @Temporal(javax.persistence.TemporalType.DATE)
     @XmlElement(name = "transactiondate")
     private Date transactiondate;
-    
+
     @Column(name = "recordcount", nullable = false)
     @XmlElement(name = "recordcount")
     private Integer recordcount;
-    
+
     @Column(name = "isdownloaded", nullable = false)
     @XmlElement(name = "isdownloaded")
     private Boolean isdownloaded;
-    
+
     @Column(name = "persist", nullable = false)
     @XmlElement(name = "persist")
     private Boolean persist;
-    
+
     @JoinColumn(name = "account", referencedColumnName = "ID")
     @ManyToOne
     @XmlTransient
     private Account account;
-    
+
     @OneToOne(mappedBy = "accountTransaction", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-    @XmlTransient 
+    @XmlTransient
     private ClaimSubmission claimsubmission;
 
     public AccountTransaction() {
@@ -196,7 +201,5 @@ public class AccountTransaction  implements Serializable {
     public void setClaimsubmission(ClaimSubmission claimsubmission) {
         this.claimsubmission = claimsubmission;
     }
-    
-    
-    
+
 }

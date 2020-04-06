@@ -333,6 +333,44 @@ public class PPO {
         return true;
     }
 
+    @WebMethod(operationName = "getAccountTransactionStatus")
+    public String getAccountTransactionStatus(@WebParam(name = "accountId") Long accountId) {
+        Account account = null;
+
+        EntityManager em = getEMFactory().createEntityManager();
+        try {
+            account = (Account) em.createNamedQuery("Account.findById").setParameter("id", accountId).getSingleResult();
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+        } finally {
+            em.close();
+        }
+
+        if (account == null) {
+            return null;
+        }
+
+        em = getEMFactory().createEntityManager();
+        Long totalCount = new Long(0);
+        Long persistedCount = new Long(0);
+
+        try {
+            totalCount = (Long) em.createNamedQuery("AccountTransaction.getCountByAccountId").setParameter("account", account).getSingleResult();
+            persistedCount = (Long) em.createNamedQuery("AccountTransaction.getPersistedCountByAccountId").setParameter("account", account).getSingleResult();
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+
+        } finally {
+            em.close();
+        }
+
+        if (totalCount.equals(persistedCount)) {
+            return "Completed";
+        }
+
+        return "" + persistedCount + "/" + totalCount;
+    }
+
     @WebMethod(operationName = "getFacilityMonthTransaction")
     public java.util.List<AccountTransaction> getFacilityMonthTransaction(@WebParam(name = "accountId") Long accountId) {
         Account account = null;
