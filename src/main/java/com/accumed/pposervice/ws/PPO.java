@@ -196,6 +196,7 @@ public class PPO {
             @WebParam(name = "fileId") String fileId) {
 
         String sFileName = "";
+        String sTargetFileName = "";
         Account account = null;
 
         EntityManager em = getEMFactory().createEntityManager();
@@ -243,7 +244,7 @@ public class PPO {
                         return "";
                     } else {
                         String fileNameNoExt = fileName.value.substring(0, fileName.value.lastIndexOf('.'));
-                        String sTargetFileName = TMP_DIR + java.io.File.separator + fileNameNoExt + ".xml";
+                        sTargetFileName = TMP_DIR + java.io.File.separator + fileNameNoExt + ".xml";
                         Files.copy(fTargetDir.listFiles()[0].toPath(), new File(sTargetFileName).toPath(),
                                 StandardCopyOption.REPLACE_EXISTING);
                         //delete extraction dir
@@ -261,7 +262,7 @@ public class PPO {
             return null;
         }
         //TestChanges1
-        return sFileName;
+        return sTargetFileName;
     }
 
     private void deleteRecursive(File path) {
