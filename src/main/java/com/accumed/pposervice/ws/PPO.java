@@ -59,6 +59,8 @@ public class PPO {
                     0L, TimeUnit.MILLISECONDS,
                     new LinkedBlockingQueue<Runnable>());
 
+    static final AtomicLong extractionFolder_NEXT_ID = new AtomicLong(0);
+
     @WebMethod(operationName = "getRegulators")
     public java.util.List<Regulator> getRegulators() {
         java.util.List ret = null;
@@ -229,8 +231,10 @@ public class PPO {
                 fos.close();
 
                 if (fileName.value.endsWith(".zip")) {
-                    String sTargetDir = TMP_DIR + java.io.File.separator + "extracted" + java.io.File.separator;
-                    File fTargetDir= new File(sTargetDir);
+                    String sTargetDir = TMP_DIR + java.io.File.separator
+                            + extractionFolder_NEXT_ID.getAndIncrement()
+                            + java.io.File.separator;
+                    File fTargetDir = new File(sTargetDir);
                     fTargetDir.mkdirs();
                     unzip(sFileName, sTargetDir);
                     if (fTargetDir.listFiles().length < 0 || fTargetDir.listFiles().length > 1) {
@@ -239,7 +243,7 @@ public class PPO {
                         return "";
                     } else {
                         String fileNameNoExt = fileName.value.substring(0, fileName.value.lastIndexOf('.'));
-                        String sTargetFileName = TMP_DIR + java.io.File.separator + fileNameNoExt +".xml";
+                        String sTargetFileName = TMP_DIR + java.io.File.separator + fileNameNoExt + ".xml";
                         Files.copy(fTargetDir.listFiles()[0].toPath(), new File(sTargetFileName).toPath(),
                                 StandardCopyOption.REPLACE_EXISTING);
                         //delete extraction dir
@@ -259,16 +263,16 @@ public class PPO {
         //TestChanges1
         return sFileName;
     }
-    
+
     private void deleteRecursive(File path) {
         File[] c = path.listFiles();
         Logger.getLogger(PPO.class.getName()).log(Level.INFO,
-                    "DocuNetWeb deleteRecursive", "Cleaning out folder:" + path.toString());
+                "DocuNetWeb deleteRecursive", "Cleaning out folder:" + path.toString());
         System.out.println("Cleaning out folder:" + path.toString());
         for (File file : c) {
             if (file.isDirectory()) {
                 Logger.getLogger(PPO.class.getName()).log(Level.INFO,
-                    "DocuNetWeb deleteRecursive", "Deleting file:" + file.toString());
+                        "DocuNetWeb deleteRecursive", "Deleting file:" + file.toString());
                 System.out.println("Deleting file:" + file.toString());
                 deleteRecursive(file);
                 file.delete();
