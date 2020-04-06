@@ -575,8 +575,9 @@ public class PPO {
                 em = getEMFactory().createEntityManager();
                 //get first unprocessed transaction according to date/download/parse/save
                 Query q = em.createNamedQuery("AccountTransaction.findFirstUnprocessed");
+                q.setParameter("account", account);
                 q.setMaxResults(1);
-                AccountTransaction trans = (AccountTransaction) q.getResultList();
+                AccountTransaction trans = (AccountTransaction) q.getSingleResult();
 
                 if (trans != null) {
 

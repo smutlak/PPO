@@ -45,7 +45,7 @@ import javax.xml.bind.annotation.XmlType;
 @NamedQueries({
     @NamedQuery(name = "AccountTransaction.findAll", query = "SELECT a FROM AccountTransaction a"),
     @NamedQuery(name = "AccountTransaction.findById", query = "SELECT a FROM AccountTransaction a WHERE a.id = :id"),
-    @NamedQuery(name = "AccountTransaction.findFirstUnprocessed", query = "SELECT a FROM AccountTransaction a WHERE a.id = :id order by a.transactiondate desc"),
+    @NamedQuery(name = "AccountTransaction.findFirstUnprocessed", query = "SELECT a FROM AccountTransaction a WHERE a.account = :account AND a.persist=FALSE order by a.transactiondate desc"),
     @NamedQuery(name = "AccountTransaction.getCountByAccountId", query = "SELECT COUNT(a) FROM AccountTransaction a WHERE a.account = :account"),
     @NamedQuery(name = "AccountTransaction.getPersistedCountByAccountId", query = "SELECT COUNT(a) FROM AccountTransaction a WHERE a.account = :account AND a.persist=TRUE")})
 
