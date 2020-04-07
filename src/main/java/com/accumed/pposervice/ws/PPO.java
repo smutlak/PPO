@@ -72,7 +72,7 @@ public class PPO {
     @PostConstruct
     public void init() {
         Logger.getLogger(PPO.class.getName()).log(Level.INFO,
-                "init()", "PPO service init method.");
+                "init() PPO service init method.");
 
         boolean bConnecionOK = false;
         EntityManager em = getEMFactory().createEntityManager();
@@ -87,7 +87,7 @@ public class PPO {
 
         if (bConnecionOK) {
             Logger.getLogger(PPO.class.getName()).log(Level.INFO,
-                "init()", "PPO service init method connection is OK start services.");
+                "init() PPO service init method connection is OK start services.");
             executor = new ScheduledThreadPoolExecutor(2);
             executor.scheduleWithFixedDelay(new AccountTransactionsService(),
                     60, 10 * 60, TimeUnit.SECONDS); //for account checking new transactions
@@ -99,7 +99,7 @@ public class PPO {
     @PreDestroy
     public void end() {
         Logger.getLogger(PPO.class.getName()).log(Level.INFO,
-                "init()", "PPO service shutdown method.");
+                "init() PPO service shutdown method.");
         if (executor != null) {
             executor.shutdownNow();//shutdown();
             while (!executor.isTerminated()) {
@@ -317,12 +317,12 @@ public class PPO {
     private void deleteRecursive(File path) {
         File[] c = path.listFiles();
         Logger.getLogger(PPO.class.getName()).log(Level.INFO,
-                "PPO deleteRecursive", "Cleaning out folder:" + path.toString());
+                "PPO deleteRecursive Cleaning out folder:" + path.toString());
         System.out.println("Cleaning out folder:" + path.toString());
         for (File file : c) {
             if (file.isDirectory()) {
                 Logger.getLogger(PPO.class.getName()).log(Level.INFO,
-                        "PPO deleteRecursive", "Deleting file:" + file.toString());
+                        "PPO deleteRecursive Deleting file:" + file.toString());
                 System.out.println("Deleting file:" + file.toString());
                 deleteRecursive(file);
                 file.delete();
