@@ -767,7 +767,7 @@ public class PPO {
                         //parse
                         ClaimSubmission submission = ClaimsReader.ReadXML(sXmlFile);
                         //save
-                        submission = resetAttachments(submission);
+                        //submission = resetAttachments(submission);
                         submission = Utils.setParents(submission);
                         submission.setAccountTransaction(trans);
                         trans.setPersist(Boolean.TRUE);

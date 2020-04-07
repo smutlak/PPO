@@ -71,7 +71,7 @@ public class Resubmission implements Serializable{
     @XmlSchemaType(name = "string")
     protected ResubmissionType type;
     
-    @Column(name = "comment")
+    @Column(name = "comment", length=2048)
     @XmlElement(name = "Comment", required = true)
     protected String comment;
     
