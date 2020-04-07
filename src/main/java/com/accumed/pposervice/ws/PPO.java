@@ -74,7 +74,7 @@ public class PPO {
                 "init()", "PPO service init method.");
         executor = new ScheduledThreadPoolExecutor(2);
         executor.scheduleWithFixedDelay(new AccountTransactionsService(),
-                60, 60 * 60, TimeUnit.SECONDS); //for account checking new transactions
+                60, 10 * 60, TimeUnit.SECONDS); //for account checking new transactions
         executor.scheduleWithFixedDelay(new TransactionDownloadService(),
                 90, 1 * 60, TimeUnit.SECONDS); //for downloading transactions
     }
@@ -286,12 +286,12 @@ public class PPO {
     private void deleteRecursive(File path) {
         File[] c = path.listFiles();
         Logger.getLogger(PPO.class.getName()).log(Level.INFO,
-                "DocuNetWeb deleteRecursive", "Cleaning out folder:" + path.toString());
+                "PPO deleteRecursive", "Cleaning out folder:" + path.toString());
         System.out.println("Cleaning out folder:" + path.toString());
         for (File file : c) {
             if (file.isDirectory()) {
                 Logger.getLogger(PPO.class.getName()).log(Level.INFO,
-                        "DocuNetWeb deleteRecursive", "Deleting file:" + file.toString());
+                        "PPO deleteRecursive", "Deleting file:" + file.toString());
                 System.out.println("Deleting file:" + file.toString());
                 deleteRecursive(file);
                 file.delete();
@@ -705,6 +705,9 @@ public class PPO {
                                 .setParameter("account", account)
                                 .getResultList();
                         java.util.List<AccountTransaction> transToBePersisted = removeAlreadyExistedTransactions(newTrans, persistedOnes);
+                        Logger.getLogger(AccountTransactionsService.class.getName()).log(Level.INFO, 
+                                "AccountTransactionsService Account = {0} transToBePersisted={1} newTrans={2} persistedOnes={3}", 
+                                new Object[]{account.getId(), transToBePersisted.size(), newTrans.size(), persistedOnes.size()});
 
                         em.getTransaction().begin();
                         for (AccountTransaction tran : transToBePersisted) {
