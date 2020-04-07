@@ -233,9 +233,9 @@ public class PPO {
             em.close();
         }
 
-        PersistPendingTransactionsListThread persistPendingTransactionsListThread
-                = new PersistPendingTransactionsListThread(account);
-        PersistPendingTransactionsListFixedPool.submit(persistPendingTransactionsListThread);
+//        PersistPendingTransactionsListThread persistPendingTransactionsListThread
+//                = new PersistPendingTransactionsListThread(account);
+//        PersistPendingTransactionsListFixedPool.submit(persistPendingTransactionsListThread);
 
         return account == null ? -1L : account.getId();
     }
@@ -546,7 +546,7 @@ public class PPO {
         return entityManagerFactory != null ? entityManagerFactory : Persistence.createEntityManagerFactory("PPOServicePU");
     }
 
-    protected class PersistPendingTransactionsListThread implements Runnable {
+    /*protected class PersistPendingTransactionsListThread implements Runnable {
 
         private Account account;
 //        private com.accumed.model.scrubRequest.ScrubRequest req = null;
@@ -600,9 +600,9 @@ public class PPO {
                 }
             }
         }
-    }
+    }*/
 
-    protected class ProcessPendingTransactionsListThread implements Runnable {
+    /*protected class ProcessPendingTransactionsListThread implements Runnable {
 
         private Account account;
 //        private com.accumed.model.scrubRequest.ScrubRequest req = null;
@@ -673,7 +673,7 @@ public class PPO {
                 }
             }
         }
-    }
+    }*/
 
     private static void unzip(String zipFilePath, String destDir) {
         File dir = new File(destDir);
@@ -788,7 +788,7 @@ public class PPO {
 
                 if (trans != null) {
 
-                    Logger.getLogger(ProcessPendingTransactionsListThread.class.getName()).
+                    Logger.getLogger(TransactionDownloadService.class.getName()).
                             log(Level.INFO, "ProcessPendingTransactionsListThread started "
                                     + PROCESS_PENDING_TRANSACTIONS_THREAD_UNIQUE_ID + trans.getAccount() != null
                                     ? trans.getAccount().getId() + " " + trans.getAccount().getEmail()
