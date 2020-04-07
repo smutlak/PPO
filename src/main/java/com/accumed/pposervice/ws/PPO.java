@@ -90,9 +90,9 @@ public class PPO {
                 "init() PPO service init method connection is OK start services.");
             executor = new ScheduledThreadPoolExecutor(2);
             executor.scheduleWithFixedDelay(new AccountTransactionsService(),
-                    60, 10 * 60, TimeUnit.SECONDS); //for account checking new transactions
+                    30, 30, TimeUnit.SECONDS); //for account checking new transactions
             executor.scheduleWithFixedDelay(new TransactionDownloadService(),
-                    90, 1 * 60, TimeUnit.SECONDS); //for downloading transactions
+                    60, 11, TimeUnit.SECONDS); //for downloading transactions
         }
     }
 
@@ -477,25 +477,6 @@ public class PPO {
         if (foundTransactions.value != null && !foundTransactions.value.isEmpty()) {
             trans = convert(foundTransactions.value);
         }
-
-//        if (trans != null) {
-//            em = getEMFactory().createEntityManager();
-//
-//            try {
-//                em.getTransaction().begin();
-//                for (AccountTransaction tran : trans) {
-//                    tran.setAccount(account);
-//                    em.persist(tran);
-//                }
-//                em.getTransaction().commit();
-//            } catch (Exception e) {
-//                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
-//                em.getTransaction().rollback();
-//            } finally {
-//                em.close();
-//            }
-//        }
-
         return trans;
     }
 
