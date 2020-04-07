@@ -16,8 +16,10 @@ import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -65,8 +67,7 @@ public class PPO {
                     new LinkedBlockingQueue<Runnable>());
 
     static final AtomicLong extractionFolder_NEXT_ID = new AtomicLong(0);
-    
-    
+
     @PostConstruct
     public void init() {
         Logger.getLogger(PPO.class.getName()).log(Level.INFO,
@@ -692,7 +693,36 @@ public class PPO {
         public void run() {
             try {
                 Logger.getLogger(AccountTransactionsService.class.getName()).log(Level.INFO, "AccountTransactionsService task running at {0}", new Date());
+                //get active accounts & loop in them, 
+                //for each account get the month transacions, remove already persisted
+                //persist the remainng ones
+                EntityManager em = getEMFactory().createEntityManager();
+                try {
+                    List<Account> accounts = em.createNamedQuery("Account.findAll").getResultList();
+                    for (Account account : accounts) {
+                        java.util.List<AccountTransaction> newTrans = getFacilityMonthTransaction(account.getId());
+                        List<AccountTransaction> persistedOnes = em.createNamedQuery("AccountTransaction.findByAccountId")
+                                .setParameter("account", account)
+                                .getResultList();
+                        java.util.List<AccountTransaction> transToBePersisted = removeAlreadyExistedTransactions(newTrans, persistedOnes);
 
+                        em.getTransaction().begin();
+                        for (AccountTransaction tran : transToBePersisted) {
+                            tran.setAccount(account);
+                            em.merge(tran);
+
+                        }
+                        em.getTransaction().commit();
+                    }
+
+                } catch (Exception e) {
+                    if (em.getTransaction().isActive()) {
+                        em.getTransaction().rollback();
+                    }
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+                } finally {
+                    em.close();
+                }
             } catch (Throwable e) {
                 //Logger.getLogger(CachedRepositoryService.class.getName()).log(Level.SEVERE, "Exception={0}\nMessage={1}\nLocalizedMessage={2}\nCause={3}", new Object[]{e.toString(), e.getMessage(), e.getLocalizedMessage(), e.getCause().toString()});
                 Logger.getLogger(AccountTransactionsService.class.getName()).log(Level.SEVERE, "wsdsda");
@@ -709,13 +739,80 @@ public class PPO {
 
         @Override
         public void run() {
-            try {
-                Logger.getLogger(TransactionDownloadService.class.getName()).log(Level.INFO, "TransactionDownloadService task running at {0}", new Date());
+            Logger.getLogger(TransactionDownloadService.class.getName()).log(Level.INFO, "TransactionDownloadService task running at {0}", new Date());
+            //get top unpersisted transaction
+            //download & persist.
+            EntityManager em = null;
+            final long PROCESS_PENDING_TRANSACTIONS_THREAD_UNIQUE_ID = PersistPendingTransactionsListThread_NEXT_ID.getAndIncrement();
 
-            } catch (Throwable e) {
-                //Logger.getLogger(CachedRepositoryService.class.getName()).log(Level.SEVERE, "Exception={0}\nMessage={1}\nLocalizedMessage={2}\nCause={3}", new Object[]{e.toString(), e.getMessage(), e.getLocalizedMessage(), e.getCause().toString()});
-                Logger.getLogger(TransactionDownloadService.class.getName()).log(Level.SEVERE, "wsdsda");
+            try {
+                em = getEMFactory().createEntityManager();
+                //get first unprocessed transaction according to date/download/parse/save
+                Query q = em.createNamedQuery("AccountTransaction.findFirstUnprocessed");
+                q.setMaxResults(1);
+                AccountTransaction trans = (AccountTransaction) q.getSingleResult();
+
+                if (trans != null) {
+
+                    Logger.getLogger(ProcessPendingTransactionsListThread.class.getName()).
+                            log(Level.INFO, "ProcessPendingTransactionsListThread started "
+                                    + PROCESS_PENDING_TRANSACTIONS_THREAD_UNIQUE_ID + trans.getAccount() != null
+                                    ? trans.getAccount().getId() + " " + trans.getAccount().getEmail()
+                                    : "account is null" + " fileId = " + trans.getFileid());
+
+                    //download
+                    String sXmlFile = downloadClaimSubmissionFile(trans.getAccount().getId(), trans.getFileid());
+                    File fXmlFile = new File(sXmlFile);
+                    if (fXmlFile.exists()) {
+                        //parse
+                        ClaimSubmission submission = ClaimsReader.ReadXML(sXmlFile);
+                        //save
+                        submission = Utils.setParents(submission);
+                        submission.setAccountTransaction(trans);
+                        trans.setPersist(Boolean.TRUE);
+                        em.getTransaction().begin();
+                        em.merge(submission);
+                        em.getTransaction().commit();
+                    } else {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE,
+                                "Error", "File Not Exist:" + sXmlFile);
+                    }
+                }
+
+            } catch (Exception e) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+                if (em != null) {
+                    if (em.getTransaction().isActive()) {
+                        em.getTransaction().rollback();
+                    }
+                    em.close();
+                    em = null;
+                }
+            } finally {
+                if (em != null) {
+                    em.close();
+                    em = null;
+                }
             }
         }
     }
+
+    private List<AccountTransaction> removeAlreadyExistedTransactions(List<AccountTransaction> newTrans,
+            List<AccountTransaction> persistedOnes) {
+        List<AccountTransaction> ret = new ArrayList();
+        for (AccountTransaction newTran : newTrans) {
+            boolean bFound = false;
+            for (AccountTransaction persistedOne : persistedOnes) {
+                if (newTran.getFileid().equalsIgnoreCase(persistedOne.getFileid())) {
+                    bFound = true;
+                    break;
+                }
+            }
+            if (!bFound) {
+                ret.add(newTran);
+            }
+        }
+        return ret;
+    }
+
 }
