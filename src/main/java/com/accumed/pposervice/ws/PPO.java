@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -72,11 +73,41 @@ public class PPO {
     public void init() {
         Logger.getLogger(PPO.class.getName()).log(Level.INFO,
                 "init()", "PPO service init method.");
-        executor = new ScheduledThreadPoolExecutor(2);
-        executor.scheduleWithFixedDelay(new AccountTransactionsService(),
-                60, 10 * 60, TimeUnit.SECONDS); //for account checking new transactions
-        executor.scheduleWithFixedDelay(new TransactionDownloadService(),
-                90, 1 * 60, TimeUnit.SECONDS); //for downloading transactions
+
+        boolean bConnecionOK = false;
+        EntityManager em = getEMFactory().createEntityManager();
+        try {
+            em.createQuery("SELECT r FROM Regulator r").getResultList();
+            bConnecionOK = true;
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+        } finally {
+            em.close();
+        }
+
+        if (bConnecionOK) {
+            Logger.getLogger(PPO.class.getName()).log(Level.INFO,
+                "init()", "PPO service init method connection is OK start services.");
+            executor = new ScheduledThreadPoolExecutor(2);
+            executor.scheduleWithFixedDelay(new AccountTransactionsService(),
+                    60, 10 * 60, TimeUnit.SECONDS); //for account checking new transactions
+            executor.scheduleWithFixedDelay(new TransactionDownloadService(),
+                    90, 1 * 60, TimeUnit.SECONDS); //for downloading transactions
+        }
+    }
+
+    @PreDestroy
+    public void end() {
+        Logger.getLogger(PPO.class.getName()).log(Level.INFO,
+                "init()", "PPO service shutdown method.");
+        if (executor != null) {
+            executor.shutdownNow();//shutdown();
+            while (!executor.isTerminated()) {
+                Logger.getLogger(PPO.class.getName()).log(Level.INFO, "Waiting agents to shutdown..");
+                Logger.getLogger(PPO.class.getName()).log(Level.SEVERE, "Exception: Waiting agents to shutdown..");
+            }
+            executor = null;
+        }
     }
 
     @WebMethod(operationName = "getRegulators")
@@ -705,8 +736,8 @@ public class PPO {
                                 .setParameter("account", account)
                                 .getResultList();
                         java.util.List<AccountTransaction> transToBePersisted = removeAlreadyExistedTransactions(newTrans, persistedOnes);
-                        Logger.getLogger(AccountTransactionsService.class.getName()).log(Level.INFO, 
-                                "AccountTransactionsService Account = {0} transToBePersisted={1} newTrans={2} persistedOnes={3}", 
+                        Logger.getLogger(AccountTransactionsService.class.getName()).log(Level.INFO,
+                                "AccountTransactionsService Account = {0} transToBePersisted={1} newTrans={2} persistedOnes={3}",
                                 new Object[]{account.getId(), transToBePersisted.size(), newTrans.size(), persistedOnes.size()});
 
                         em.getTransaction().begin();
@@ -793,6 +824,7 @@ public class PPO {
                     em.close();
                     em = null;
                 }
+
             } finally {
                 if (em != null) {
                     em.close();
