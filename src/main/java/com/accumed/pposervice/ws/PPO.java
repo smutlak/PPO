@@ -24,6 +24,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,6 +70,8 @@ public class PPO {
 
     static final AtomicLong extractionFolder_NEXT_ID = new AtomicLong(0);
 
+    AtomicBoolean ONE_SERVICE_IS_RUNNING = new AtomicBoolean(false);
+
     @PostConstruct
     public void init() {
         Logger.getLogger(PPO.class.getName()).log(Level.INFO,
@@ -87,9 +90,9 @@ public class PPO {
 
         if (bConnecionOK) {
             Logger.getLogger(PPO.class.getName()).log(Level.INFO,
-                "init() PPO service init method connection is OK start services.");
+                    "init() PPO service init method connection is OK start services.");
             executor = new ScheduledThreadPoolExecutor(2);
-            executor.scheduleWithFixedDelay(new AccountTransactionsService(),
+            executor.scheduleWithFixedDelay(new AccountTransactionsService(null),
                     30, 30, TimeUnit.SECONDS); //for account checking new transactions
             executor.scheduleWithFixedDelay(new TransactionDownloadService(),
                     60, 11, TimeUnit.SECONDS); //for downloading transactions
@@ -236,7 +239,10 @@ public class PPO {
 //        PersistPendingTransactionsListThread persistPendingTransactionsListThread
 //                = new PersistPendingTransactionsListThread(account);
 //        PersistPendingTransactionsListFixedPool.submit(persistPendingTransactionsListThread);
-
+        
+        Thread t1 = new Thread(new AccountTransactionsService(account)); 
+        t1.setPriority(Thread.MIN_PRIORITY);
+        t1.start();
         return account == null ? -1L : account.getId();
     }
 
@@ -583,7 +589,7 @@ public class PPO {
         }
     }*/
 
-    /*protected class ProcessPendingTransactionsListThread implements Runnable {
+ /*protected class ProcessPendingTransactionsListThread implements Runnable {
 
         private Account account;
 //        private com.accumed.model.scrubRequest.ScrubRequest req = null;
@@ -655,7 +661,6 @@ public class PPO {
             }
         }
     }*/
-
     private static void unzip(String zipFilePath, String destDir) {
         File dir = new File(destDir);
         // create output directory if it doesn't exist
@@ -697,20 +702,30 @@ public class PPO {
 
     protected class AccountTransactionsService implements Runnable {
 
-        public AccountTransactionsService() {
-
+        Account single_account = null;
+        public AccountTransactionsService(Account singleAccount) {
+            this.single_account = singleAccount;
         }
 
         @Override
         public void run() {
             try {
+                if (!ONE_SERVICE_IS_RUNNING.compareAndSet(false, true)) {
+                    return;
+                }
                 Logger.getLogger(AccountTransactionsService.class.getName()).log(Level.INFO, "AccountTransactionsService task running at {0}", new Date());
                 //get active accounts & loop in them, 
                 //for each account get the month transacions, remove already persisted
                 //persist the remainng ones
                 EntityManager em = getEMFactory().createEntityManager();
                 try {
-                    List<Account> accounts = em.createNamedQuery("Account.findAll").getResultList();
+                    List<Account> accounts = null;
+                    if(single_account == null){
+                        accounts = em.createNamedQuery("Account.findAll").getResultList();
+                    }else{
+                        accounts = new ArrayList();
+                        accounts.add(single_account);
+                    }
                     for (Account account : accounts) {
                         java.util.List<AccountTransaction> newTrans = getFacilityMonthTransaction(account.getId());
                         List<AccountTransaction> persistedOnes = em.createNamedQuery("AccountTransaction.findByAccountId")
@@ -742,6 +757,10 @@ public class PPO {
                 //Logger.getLogger(CachedRepositoryService.class.getName()).log(Level.SEVERE, "Exception={0}\nMessage={1}\nLocalizedMessage={2}\nCause={3}", new Object[]{e.toString(), e.getMessage(), e.getLocalizedMessage(), e.getCause().toString()});
                 Logger.getLogger(AccountTransactionsService.class.getName()).log(Level.SEVERE, "wsdsda");
             }
+
+            if (!ONE_SERVICE_IS_RUNNING.compareAndSet(true, false)) {
+                Logger.getLogger(AccountTransactionsService.class.getName()).log(Level.SEVERE, "AccountTransactionsService Service running flag ERROR");
+            }
         }
 
     }
@@ -754,6 +773,9 @@ public class PPO {
 
         @Override
         public void run() {
+            if (!ONE_SERVICE_IS_RUNNING.compareAndSet(false, true)) {
+                return;
+            }
             Logger.getLogger(TransactionDownloadService.class.getName()).log(Level.INFO, "TransactionDownloadService task running at {0}", new Date());
             //get top unpersisted transaction
             //download & persist.
@@ -770,7 +792,7 @@ public class PPO {
                 if (trans != null) {
 
                     Logger.getLogger(TransactionDownloadService.class.getName()).
-                            log(Level.INFO, "ProcessPendingTransactionsListThread started {0}{1} {2} fileId = {3}", 
+                            log(Level.INFO, "ProcessPendingTransactionsListThread started {0}{1} {2} fileId = {3}",
                                     new Object[]{PROCESS_PENDING_TRANSACTIONS_THREAD_UNIQUE_ID, trans.getAccount().getId(), trans.getAccount().getEmail(), trans.getFileid()});
 
                     //download
@@ -809,6 +831,9 @@ public class PPO {
                     em.close();
                     em = null;
                 }
+            }
+            if (!ONE_SERVICE_IS_RUNNING.compareAndSet(true, false)) {
+                Logger.getLogger(AccountTransactionsService.class.getName()).log(Level.SEVERE, "TransactionDownloadService Service running flag ERROR");
             }
         }
     }
