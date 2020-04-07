@@ -478,23 +478,23 @@ public class PPO {
             trans = convert(foundTransactions.value);
         }
 
-        if (trans != null) {
-            em = getEMFactory().createEntityManager();
-
-            try {
-                em.getTransaction().begin();
-                for (AccountTransaction tran : trans) {
-                    tran.setAccount(account);
-                    em.persist(tran);
-                }
-                em.getTransaction().commit();
-            } catch (Exception e) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
-                em.getTransaction().rollback();
-            } finally {
-                em.close();
-            }
-        }
+//        if (trans != null) {
+//            em = getEMFactory().createEntityManager();
+//
+//            try {
+//                em.getTransaction().begin();
+//                for (AccountTransaction tran : trans) {
+//                    tran.setAccount(account);
+//                    em.persist(tran);
+//                }
+//                em.getTransaction().commit();
+//            } catch (Exception e) {
+//                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+//                em.getTransaction().rollback();
+//            } finally {
+//                em.close();
+//            }
+//        }
 
         return trans;
     }
