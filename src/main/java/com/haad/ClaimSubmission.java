@@ -8,7 +8,7 @@
 
 package com.haad;
 
-import com.accumed.pposervice.model.Account;
+
 import com.accumed.pposervice.model.AccountTransaction;
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -789,10 +789,8 @@ public class PPO {
                 if (trans != null) {
 
                     Logger.getLogger(TransactionDownloadService.class.getName()).
-                            log(Level.INFO, "ProcessPendingTransactionsListThread started "
-                                    + PROCESS_PENDING_TRANSACTIONS_THREAD_UNIQUE_ID + trans.getAccount() != null
-                                    ? trans.getAccount().getId() + " " + trans.getAccount().getEmail()
-                                    : "account is null" + " fileId = " + trans.getFileid());
+                            log(Level.INFO, "ProcessPendingTransactionsListThread started {0}{1} {2} fileId = {3}", 
+                                    new Object[]{PROCESS_PENDING_TRANSACTIONS_THREAD_UNIQUE_ID, trans.getAccount().getId(), trans.getAccount().getEmail(), trans.getFileid()});
 
                     //download
                     String sXmlFile = downloadClaimSubmissionFile(trans.getAccount().getId(), trans.getFileid());
