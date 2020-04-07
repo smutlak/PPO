@@ -74,9 +74,9 @@ public class PPO {
                 "init()", "PPO service init method.");
         executor = new ScheduledThreadPoolExecutor(2);
         executor.scheduleWithFixedDelay(new AccountTransactionsService(),
-                120, 60 * 60, TimeUnit.SECONDS); //for account checking new transactions
+                60, 60 * 60, TimeUnit.SECONDS); //for account checking new transactions
         executor.scheduleWithFixedDelay(new TransactionDownloadService(),
-                150, 1 * 60, TimeUnit.SECONDS); //for downloading transactions
+                90, 1 * 60, TimeUnit.SECONDS); //for downloading transactions
     }
 
     @WebMethod(operationName = "getRegulators")
@@ -767,9 +767,11 @@ public class PPO {
                         //parse
                         ClaimSubmission submission = ClaimsReader.ReadXML(sXmlFile);
                         //save
+                        submission = resetAttachments(submission);
                         submission = Utils.setParents(submission);
                         submission.setAccountTransaction(trans);
                         trans.setPersist(Boolean.TRUE);
+
                         em.getTransaction().begin();
                         em.merge(submission);
                         em.getTransaction().commit();
@@ -815,4 +817,19 @@ public class PPO {
         return ret;
     }
 
+    private ClaimSubmission resetAttachments(ClaimSubmission submission) {
+        for (com.haad.Claim c : submission.getClaim()) {
+            if (c != null) {
+                if (c.getResubmission() != null) {
+                    if (c.getResubmission().getAttachment() != null
+                            && c.getResubmission().getAttachment().length > 1) {
+                        byte[] dummy = new byte[1];
+                        dummy[0] = 1;
+                        c.getResubmission().setAttachment(dummy);
+                    }
+                }
+            }
+        }
+        return submission;
+    }
 }
