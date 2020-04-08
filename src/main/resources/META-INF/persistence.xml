@@ -23,6 +23,7 @@
       <property name="javax.persistence.jdbc.user" value="postgres"/>
       <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
       <property name="javax.persistence.jdbc.password" value="post"/>-->
+      <property name="javax.persistence.sql-load-script-source" value="META-INF/loadScript.sql"/>
       <property name="eclipselink.logging.level" value="INFO"/>
       <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
     </properties>
