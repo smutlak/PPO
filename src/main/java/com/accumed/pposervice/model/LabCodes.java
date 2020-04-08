@@ -5,24 +5,16 @@
  */
 package com.accumed.pposervice.model;
 
-import com.haad.ClaimSubmission;
 import java.io.Serializable;
-import java.util.Date;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -38,11 +30,11 @@ import javax.xml.bind.annotation.XmlType;
 @Table(
         name = "labcodes",
         indexes = {
-            @Index(name = "accounttransaction_INDX_0", columnList = "code")})
+            @Index(name = "labcodes_INDX_0", columnList = "code")})
 @NamedQueries({
     @NamedQuery(name = "LabCodes.findAll", query = "SELECT a FROM LabCodes a")})
 
-@XmlRootElement(name = "Files")
+@XmlRootElement(name = "labCode")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
     "code",

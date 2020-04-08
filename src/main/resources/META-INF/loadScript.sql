@@ -1,13 +1,3 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-/**
- * Author:  accumeddev1
- * Created: Apr 8, 2020
- */
-
 insert into Regulator values(1, 'HAAD');
 insert into Regulator values(2, 'DHA');
 
@@ -1021,7 +1011,7 @@ Insert Into labCodes values(1007, '87147', 'CULTURE TYPE IMMUNOLOGIC');
 Insert Into labCodes values(1008, '87149', 'CULTURE TYPE NUCLEIC ACID');
 Insert Into labCodes values(1009, '87150', 'Culture, typing; identification by nucleic acid (DNA or RNA) probe, amplified probe technique, per culture or isolate, each organism probed');
 Insert Into labCodes values(1010, '87152', 'CULTURE TYPE PULSE FIELD GEL');
-Insert Into labCodes values(1011, 'Culture, typing; identification by nucleic acid sequencing method, each isolate (eg, sequencing of the 16S rRNA gene)');
+Insert Into labCodes values(1011, '87153', 'Culture, typing; identification by nucleic acid sequencing method, each isolate (eg, sequencing of the 16S rRNA gene)');
 Insert Into labCodes values(1012, '87158', 'CULTURE TYPING ADDED METHOD');
 Insert Into labCodes values(1013, '87164', 'DARK FIELD EXAMINATION');
 Insert Into labCodes values(1014, '87166', 'DARK FIELD EXAMINATION');
