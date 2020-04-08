@@ -46,7 +46,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
     "code",
-    "desc"
+    "description"
 })
 public class LabCodes implements Serializable {
 
@@ -60,8 +60,8 @@ public class LabCodes implements Serializable {
     @XmlElement(name = "code")
     private String code;
 
-    @Column(name = "desc", nullable = false, length=2048)
-    @XmlElement(name = "desc")
+    @Column(name = "description", nullable = false, length=2048)
+    @XmlElement(name = "description")
     private String desc;
 
    
