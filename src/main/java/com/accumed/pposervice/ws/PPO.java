@@ -418,7 +418,10 @@ public class PPO {
             em.close();
         }
 
-        if (totalCount.equals(persistedCount)) {
+        if(totalCount<=0){
+            return "No Transactions";
+        }
+        if (totalCount.equals(persistedCount) && totalCount>0) {
             return "Completed";
         }
 
