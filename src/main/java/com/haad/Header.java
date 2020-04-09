@@ -10,6 +10,7 @@ package com.haad;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,6 +20,8 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -26,6 +29,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -84,8 +88,11 @@ public class Header implements Serializable{
     protected String receiverID;
     
     @Column(name = "TransactionDate")
+    @NotNull
+    @Temporal(TemporalType.TIMESTAMP)
     @XmlElement(name = "TransactionDate", required = true)
-    protected String transactionDate;
+    @XmlJavaTypeAdapter(com.accumed.pposervice.haad.service.model.XmlDateTimeAdapter.class)
+    protected Date transactionDate;
     
     @Column(name = "RecordCount")
     @XmlElement(name = "RecordCount", required = true)
@@ -158,7 +165,7 @@ public class Header implements Serializable{
      *     {@link String }
      *     
      */
-    public String getTransactionDate() {
+    public Date getTransactionDate() {
         return transactionDate;
     }
 
@@ -170,7 +177,7 @@ public class Header implements Serializable{
      *     {@link String }
      *     
      */
-    public void setTransactionDate(String value) {
+    public void setTransactionDate(Date value) {
         this.transactionDate = value;
     }
 
