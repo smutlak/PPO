@@ -294,8 +294,7 @@ public class PPO {
                     fTargetDir.mkdirs();
                     unzip(sFileName, sTargetDir);
                     if (fTargetDir.listFiles().length < 0 || fTargetDir.listFiles().length > 1) {
-                        Logger.getLogger(PPO.class.getName()).log(Level.SEVERE, "Error",
-                                "Extracted File cntains no files OR more than one file" + fTargetDir);
+                        Logger.getLogger(PPO.class.getName()).log(Level.SEVERE, "Error Extracted File cntains no files OR more than one file{0}", fTargetDir);
                         return "";
                     } else {
                         String fileNameNoExt = fileName.value.substring(0, fileName.value.lastIndexOf('.'));
@@ -307,6 +306,8 @@ public class PPO {
                         //delete zip file
                         new File(sFileName).delete();
                     }
+                }else{
+                    sTargetFileName = sFileName;
                 }
 
             }
@@ -814,8 +815,7 @@ public class PPO {
                         em.merge(submission);
                         em.getTransaction().commit();
                     } else {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE,
-                                "Error", "File Not Exist:" + sXmlFile);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Error File Not Exist:{0}", sXmlFile);
                     }
                 }
 

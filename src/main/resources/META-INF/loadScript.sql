@@ -1380,3 +1380,19 @@ Insert Into labCodes values(1376, '89354', 'THAW CRYOPRSVRD; REPROD TISS');
 Insert Into labCodes values(1377, '89356', 'THAWING CRYOPRESRVED; OOCYTE');
 Insert Into labCodes values(1378, '89398', 'Unlisted reproductive medicine laboratory procedure');
 
+CREATE OR REPLACE VIEW totalVsLabs AS
+Select date_part('month', h.transactionDate) AS txn_mont,
+h.receiverid, h.senderid,
+ROUND(sum(c.net)::numeric, 2) as total, 
+ROUND(sum(x.net)::numeric, 2) as totalLab, 
+count(c.id)
+from header h
+inner join claim_submission s on s.id= h.claim_submission_id
+inner join claim c on s.id = c.claim_submission_id
+left outer join (
+	Select a.net, c1.claim_id from Activity a inner join claim c1 on a.claim_id = c1.claim_id
+inner join labcodes l on l.code = a.code
+) x on x.claim_id = c.claim_id
+group by  h.senderid, date_part('month', h.transactionDate), h.receiverid
+order by total desc, totalLab desc, h.receiverid;
+
