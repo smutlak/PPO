@@ -28,7 +28,7 @@ import javax.persistence.Temporal;
 @Entity
 @NamedQueries({
     @NamedQuery(name = "Account.findAll", query = "SELECT a FROM Account a"),
-    @NamedQuery(name = "Account.findByUserAndPass", query = "SELECT a FROM Account a WHERE a.email=:email AND pass=:pass"),
+    @NamedQuery(name = "Account.findByUserAndPass", query = "SELECT a FROM Account a WHERE a.email=:email AND a.pass=:pass"),
     @NamedQuery(name = "Account.findById", query = "SELECT a FROM Account a WHERE a.id = :id")})
 public class Account implements Serializable {
 
