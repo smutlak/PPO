@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
@@ -437,18 +438,18 @@ public class PPO {
         EntityManager em = getEMFactory().createEntityManager();
         try {
             account = (Account) em.createNamedQuery("Account.findById").setParameter("id", accountId).getSingleResult();
-            if (account == null) {
+            if (account != null) {
                 Query q = em.createNativeQuery("Select * from totalVsLabs where senderid='"
                         + account.getRegLoginDetails().getFacilityLicense() + "'");
                 List<Object[]> list = q.getResultList();
                 for(Object[] objs: list){
                     TotalsVSLabs lab = new TotalsVSLabs();
-                    lab.setMonth((Integer)objs[0]);
+                    lab.setMonth(((Double)objs[0]).intValue());
                     lab.setReceiverid((String)objs[1]);
                     lab.setSenderid((String)objs[2]);
-                    lab.setTotal((Double)objs[3]);
-                    lab.setTotalLab((Double)objs[4]);
-                    lab.setClaimsCount((Integer)objs[5]);
+                    lab.setTotal(((BigDecimal)objs[3]).doubleValue());
+                    lab.setTotalLab(((BigDecimal)objs[4]).doubleValue());
+                    lab.setClaimsCount(((Long)objs[5]).intValue());
                     ret.add(lab);
                 }
             }
