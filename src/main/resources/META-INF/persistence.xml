@@ -5,7 +5,6 @@
     <non-jta-data-source>java:comp/env/jdbc/PPODS</non-jta-data-source>
     <class>com.accumed.pposervice.model.Account</class>
     <class>com.accumed.pposervice.model.AccountTransaction</class>
-    <class>com.accumed.pposervice.model.LabCodes</class>
     <class>com.accumed.pposervice.model.RegLoginDetails</class>
     <class>com.accumed.pposervice.model.Regulator</class>
     <class>com.accumed.pposervice.model.POJob</class>
@@ -26,7 +25,7 @@
       <property name="javax.persistence.jdbc.password" value="post"/>-->
       <property name="javax.persistence.sql-load-script-source" value="META-INF/loadScript.sql"/>
       <property name="eclipselink.logging.level" value="INFO"/>
-      <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
+      <property name="javax.persistence.schema-generation.database.action" value="create"/>
     </properties>
   </persistence-unit>
 </persistence>
