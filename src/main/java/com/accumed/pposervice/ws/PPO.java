@@ -429,6 +429,26 @@ public class PPO {
         return "" + persistedCount + "/" + totalCount;
     }
 
+    
+    @WebMethod(operationName = "login")
+    public Long getAccuntTotalsVSLabs(@WebParam(name = "username") String username,
+            @WebParam(name = "pass") String pass) {
+        Account account = null;
+        EntityManager em = getEMFactory().createEntityManager();
+        try {
+            account = (Account) em.createNamedQuery("Account.findByUserAndPass").
+                    setParameter("email", username).setParameter("pass", pass).getSingleResult();
+            if (account != null) {
+                return account.getId();
+            }
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+        } finally {
+            em.close();
+        }
+        return -1L;
+    }
+    
     @WebMethod(operationName = "getAccuntTotalsVSLabs")
     public java.util.List<TotalsVSLabs> getAccuntTotalsVSLabs(@WebParam(name = "accountId") Long accountId) {
 
