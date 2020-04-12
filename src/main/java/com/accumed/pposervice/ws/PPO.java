@@ -431,7 +431,7 @@ public class PPO {
 
     
     @WebMethod(operationName = "login")
-    public Long getAccuntTotalsVSLabs(@WebParam(name = "username") String username,
+    public Long login(@WebParam(name = "username") String username,
             @WebParam(name = "pass") String pass) {
         Account account = null;
         EntityManager em = getEMFactory().createEntityManager();
