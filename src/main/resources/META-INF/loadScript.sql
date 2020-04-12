@@ -1385,7 +1385,7 @@ Select date_part('month', h.transactionDate) AS txn_mont,
 h.receiverid, h.senderid,
 ROUND(sum(c.net)::numeric, 2) as total, 
 ROUND(sum(x.net)::numeric, 2) as totalLab, 
-count(c.id)
+count(c.id) as claimsCount
 from header h
 inner join claim_submission s on s.id= h.claim_submission_id
 inner join claim c on s.id = c.claim_submission_id

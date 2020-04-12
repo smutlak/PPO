@@ -239,8 +239,7 @@ public class PPO {
 //        PersistPendingTransactionsListThread persistPendingTransactionsListThread
 //                = new PersistPendingTransactionsListThread(account);
 //        PersistPendingTransactionsListFixedPool.submit(persistPendingTransactionsListThread);
-        
-        Thread t1 = new Thread(new AccountTransactionsService(account)); 
+        Thread t1 = new Thread(new AccountTransactionsService(account));
         t1.setPriority(Thread.MIN_PRIORITY);
         t1.start();
         return account == null ? -1L : account.getId();
@@ -306,7 +305,7 @@ public class PPO {
                         //delete zip file
                         new File(sFileName).delete();
                     }
-                }else{
+                } else {
                     sTargetFileName = sFileName;
                 }
 
@@ -419,14 +418,47 @@ public class PPO {
             em.close();
         }
 
-        if(totalCount<=0){
+        if (totalCount <= 0) {
             return "No Transactions";
         }
-        if (totalCount.equals(persistedCount) && totalCount>0) {
+        if (totalCount.equals(persistedCount) && totalCount > 0) {
             return "Completed";
         }
 
         return "" + persistedCount + "/" + totalCount;
+    }
+
+    @WebMethod(operationName = "getAccuntTotalsVSLabs")
+    public java.util.List<TotalsVSLabs> getAccuntTotalsVSLabs(@WebParam(name = "accountId") Long accountId) {
+
+        java.util.List<TotalsVSLabs> ret = new ArrayList();
+        Account account = null;
+
+        EntityManager em = getEMFactory().createEntityManager();
+        try {
+            account = (Account) em.createNamedQuery("Account.findById").setParameter("id", accountId).getSingleResult();
+            if (account == null) {
+                Query q = em.createNativeQuery("Select * from totalVsLabs where senderid='"
+                        + account.getRegLoginDetails().getFacilityLicense() + "'");
+                List<Object[]> list = q.getResultList();
+                for(Object[] objs: list){
+                    TotalsVSLabs lab = new TotalsVSLabs();
+                    lab.setMonth((Integer)objs[0]);
+                    lab.setReceiverid((String)objs[1]);
+                    lab.setSenderid((String)objs[2]);
+                    lab.setTotal((Double)objs[3]);
+                    lab.setTotalLab((Double)objs[4]);
+                    lab.setClaimsCount((Integer)objs[5]);
+                    ret.add(lab);
+                }
+            }
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+        } finally {
+            em.close();
+        }
+
+        return ret;
     }
 
     @WebMethod(operationName = "getFacilityMonthTransaction")
@@ -707,6 +739,7 @@ public class PPO {
     protected class AccountTransactionsService implements Runnable {
 
         Account single_account = null;
+
         public AccountTransactionsService(Account singleAccount) {
             this.single_account = singleAccount;
         }
@@ -724,9 +757,9 @@ public class PPO {
                 EntityManager em = getEMFactory().createEntityManager();
                 try {
                     List<Account> accounts = null;
-                    if(single_account == null){
+                    if (single_account == null) {
                         accounts = em.createNamedQuery("Account.findAll").getResultList();
-                    }else{
+                    } else {
                         accounts = new ArrayList();
                         accounts.add(single_account);
                     }
