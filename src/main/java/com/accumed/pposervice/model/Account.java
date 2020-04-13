@@ -24,11 +24,13 @@ import javax.persistence.Temporal;
 /**
  *
  * @author smutlak
+ * 
  */
 @Entity
 @NamedQueries({
     @NamedQuery(name = "Account.findAll", query = "SELECT a FROM Account a"),
     @NamedQuery(name = "Account.findByUserAndPass", query = "SELECT a FROM Account a WHERE a.email=:email AND a.pass=:pass"),
+    @NamedQuery(name = "Account.findByUser", query = "SELECT a FROM Account a WHERE a.email=:email"),
     @NamedQuery(name = "Account.findById", query = "SELECT a FROM Account a WHERE a.id = :id")})
 public class Account implements Serializable {
 

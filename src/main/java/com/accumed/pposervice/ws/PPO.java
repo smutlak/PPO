@@ -199,8 +199,8 @@ public class PPO {
         {
         EntityManager em = getEMFactory().createEntityManager();
         try {
-            account = (Account) em.createNamedQuery("Account.findByUserAndPass").
-                    setParameter("email", email).setParameter("pass", pass).getSingleResult();
+            account = (Account) em.createNamedQuery("Account.findByUser").
+                    setParameter("email", email).getSingleResult();
             if (account != null) {
                 return -2L;
             }
