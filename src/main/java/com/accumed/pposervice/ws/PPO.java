@@ -482,12 +482,12 @@ public class PPO {
                 List<Object[]> list = q.getResultList();
                 for(Object[] objs: list){
                     TotalsVSLabs lab = new TotalsVSLabs();
-                    lab.setMonth(((Double)objs[0]).intValue());
-                    lab.setReceiverid((String)objs[1]);
-                    lab.setSenderid((String)objs[2]);
-                    lab.setTotal(((BigDecimal)objs[3]).doubleValue());
-                    lab.setTotalLab(((BigDecimal)objs[4]).doubleValue());
-                    lab.setClaimsCount(((Long)objs[5]).intValue());
+                    lab.setMonth(objs[0]!=null?(((Double)objs[0]).intValue()):0);
+                    lab.setReceiverid(objs[1]!=null?((String)objs[1]):"");
+                    lab.setSenderid(objs[2]!=null?((String)objs[2]):"");
+                    lab.setTotal(objs[3]!=null?(((BigDecimal)objs[3]).doubleValue()):0);
+                    lab.setTotalLab(objs[4]!=null?(((BigDecimal)objs[4]).doubleValue()):0);
+                    lab.setClaimsCount(objs[5]!=null?(((Long)objs[5]).intValue()):0);
                     ret.add(lab);
                 }
             }
