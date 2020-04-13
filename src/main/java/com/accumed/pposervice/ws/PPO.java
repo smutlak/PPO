@@ -193,6 +193,24 @@ public class PPO {
 
         Account account;
         Long regID = Long.parseLong(regualtorID);
+        
+        
+        //check if account exist
+        {
+        EntityManager em = getEMFactory().createEntityManager();
+        try {
+            account = (Account) em.createNamedQuery("Account.findByUserAndPass").
+                    setParameter("email", email).setParameter("pass", pass).getSingleResult();
+            if (account != null) {
+                return -2L;
+            }
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+        } finally {
+            em.close();
+        }
+        account = null;
+            }
 
         Regulator regulator = null;
         java.util.List<Regulator> regs = getRegulators();
