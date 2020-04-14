@@ -946,4 +946,48 @@ public class PPO {
         }
         return submission;
     }
+
+    @WebMethod(operationName = "findCpt")
+    public java.util.List<CPT> findCpt(@WebParam(name = "code") String code,
+            @WebParam(name = "desc") String desc) {
+        
+        List<CPT> cpts;
+
+        EntityManager em = getEMFactory().createEntityManager();
+        try {
+             cpts = em.createNamedQuery("CPT.findByCodeOrDescLike")
+                    .setParameter("code", code)
+                    .setParameter("short_description", desc)
+                    .getResultList();
+             return cpts;
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+        } finally {
+            em.close();
+        }
+        return null;
+    }
+    
+    @WebMethod(operationName = "findIcd")
+    public java.util.List<ICD> findIcd(@WebParam(name = "code") String code,
+            @WebParam(name = "desc") String desc) {
+        
+        List<ICD> icds;
+
+        EntityManager em = getEMFactory().createEntityManager();
+        try {
+             icds = em.createNamedQuery("ICD.findByCodeOrDescLike")
+                    .setParameter("code", code)
+                    .setParameter("short_description", desc)
+                    .getResultList();
+             return icds;
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+        } finally {
+            em.close();
+        }
+        return null;
+    }
+    
+    
 }

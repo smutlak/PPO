@@ -7,6 +7,9 @@
     <class>com.accumed.pposervice.model.AccountTransaction</class>
     <class>com.accumed.pposervice.model.RegLoginDetails</class>
     <class>com.accumed.pposervice.model.Regulator</class>
+    <class>com.accumed.pposervice.model.LabCodes</class>
+    <class>com.accumed.pposervice.model.CPT</class>
+    <class>com.accumed.pposervice.model.ICD</class>
     <class>com.accumed.pposervice.model.POJob</class>
     <class>com.haad.ClaimSubmission</class>
     <class>com.haad.Header</class>
