@@ -94,9 +94,9 @@ public class PPO {
                     "init() PPO service init method connection is OK start services.");
             executor = new ScheduledThreadPoolExecutor(2);
             executor.scheduleWithFixedDelay(new AccountTransactionsService(null),
-                    30, 30, TimeUnit.SECONDS); //for account checking new transactions
+                    2, 90, TimeUnit.MINUTES); //for account checking new transactions
             executor.scheduleWithFixedDelay(new TransactionDownloadService(),
-                    60, 11, TimeUnit.SECONDS); //for downloading transactions
+                    180, 9, TimeUnit.SECONDS); //for downloading transactions
         }
     }
 
