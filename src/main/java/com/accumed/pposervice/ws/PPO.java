@@ -193,24 +193,23 @@ public class PPO {
 
         Account account;
         Long regID = Long.parseLong(regualtorID);
-        
-        
+
         //check if account exist
         {
-        EntityManager em = getEMFactory().createEntityManager();
-        try {
-            account = (Account) em.createNamedQuery("Account.findByUser").
-                    setParameter("email", email).getSingleResult();
-            if (account != null) {
-                return -2L;
+            EntityManager em = getEMFactory().createEntityManager();
+            try {
+                account = (Account) em.createNamedQuery("Account.findByUser").
+                        setParameter("email", email).getSingleResult();
+                if (account != null) {
+                    return -2L;
+                }
+            } catch (Exception e) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+            } finally {
+                em.close();
             }
-        } catch (Exception e) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
-        } finally {
-            em.close();
+            account = null;
         }
-        account = null;
-            }
 
         Regulator regulator = null;
         java.util.List<Regulator> regs = getRegulators();
@@ -447,7 +446,6 @@ public class PPO {
         return "" + persistedCount + "/" + totalCount;
     }
 
-    
     @WebMethod(operationName = "login")
     public Long login(@WebParam(name = "username") String username,
             @WebParam(name = "pass") String pass) {
@@ -466,7 +464,7 @@ public class PPO {
         }
         return -1L;
     }
-    
+
     @WebMethod(operationName = "getAccuntTotalsVSLabs")
     public java.util.List<TotalsVSLabs> getAccuntTotalsVSLabs(@WebParam(name = "accountId") Long accountId) {
 
@@ -480,14 +478,14 @@ public class PPO {
                 Query q = em.createNativeQuery("Select * from totalVsLabs where senderid='"
                         + account.getRegLoginDetails().getFacilityLicense() + "'");
                 List<Object[]> list = q.getResultList();
-                for(Object[] objs: list){
+                for (Object[] objs : list) {
                     TotalsVSLabs lab = new TotalsVSLabs();
-                    lab.setMonth(objs[0]!=null?(((Double)objs[0]).intValue()):0);
-                    lab.setReceiverid(objs[1]!=null?((String)objs[1]):"");
-                    lab.setSenderid(objs[2]!=null?((String)objs[2]):"");
-                    lab.setTotal(objs[3]!=null?(((BigDecimal)objs[3]).doubleValue()):0);
-                    lab.setTotalLab(objs[4]!=null?(((BigDecimal)objs[4]).doubleValue()):0);
-                    lab.setClaimsCount(objs[5]!=null?(((Long)objs[5]).intValue()):0);
+                    lab.setMonth(objs[0] != null ? (((Double) objs[0]).intValue()) : 0);
+                    lab.setReceiverid(objs[1] != null ? ((String) objs[1]) : "");
+                    lab.setSenderid(objs[2] != null ? ((String) objs[2]) : "");
+                    lab.setTotal(objs[3] != null ? (((BigDecimal) objs[3]).doubleValue()) : 0);
+                    lab.setTotalLab(objs[4] != null ? (((BigDecimal) objs[4]).doubleValue()) : 0);
+                    lab.setClaimsCount(objs[5] != null ? (((Long) objs[5]).intValue()) : 0);
                     ret.add(lab);
                 }
             }
@@ -879,6 +877,7 @@ public class PPO {
                         ClaimSubmission submission = ClaimsReader.ReadXML(sXmlFile);
                         //save
                         //submission = resetAttachments(submission);
+                        submission = resetObservationAttachments(submission);
                         submission = Utils.setParents(submission);
                         submission.setAccountTransaction(trans);
                         trans.setPersist(Boolean.TRUE);
@@ -931,15 +930,19 @@ public class PPO {
         return ret;
     }
 
-    private ClaimSubmission resetAttachments(ClaimSubmission submission) {
+    private ClaimSubmission resetObservationAttachments(ClaimSubmission submission) {
         for (com.haad.Claim c : submission.getClaim()) {
             if (c != null) {
-                if (c.getResubmission() != null) {
-                    if (c.getResubmission().getAttachment() != null
-                            && c.getResubmission().getAttachment().length > 1) {
-                        byte[] dummy = new byte[1];
-                        dummy[0] = 1;
-                        c.getResubmission().setAttachment(dummy);
+                if (c.getActivity() != null) {
+                    for (com.haad.Activity a : c.getActivity()) {
+                        for (com.haad.Observation o : a.getObservation()) {
+                            if (o.getValue() != null) {
+                                if (o.getValue().length() > 250) {
+                                    o.setValue(o.getValue().substring(0, 250));
+
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -950,16 +953,16 @@ public class PPO {
     @WebMethod(operationName = "findCpt")
     public java.util.List<CPT> findCpt(@WebParam(name = "code") String code,
             @WebParam(name = "desc") String desc) {
-        
+
         List<CPT> cpts;
 
         EntityManager em = getEMFactory().createEntityManager();
         try {
-             cpts = em.createNamedQuery("CPT.findByCodeOrDescLike")
+            cpts = em.createNamedQuery("CPT.findByCodeOrDescLike")
                     .setParameter("code", code)
                     .setParameter("short_description", desc)
                     .getResultList();
-             return cpts;
+            return cpts;
         } catch (Exception e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
         } finally {
@@ -967,20 +970,20 @@ public class PPO {
         }
         return null;
     }
-    
+
     @WebMethod(operationName = "findIcd")
     public java.util.List<ICD> findIcd(@WebParam(name = "code") String code,
             @WebParam(name = "desc") String desc) {
-        
+
         List<ICD> icds;
 
         EntityManager em = getEMFactory().createEntityManager();
         try {
-             icds = em.createNamedQuery("ICD.findByCodeOrDescLike")
+            icds = em.createNamedQuery("ICD.findByCodeOrDescLike")
                     .setParameter("code", code)
                     .setParameter("short_description", desc)
                     .getResultList();
-             return icds;
+            return icds;
         } catch (Exception e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
         } finally {
@@ -988,6 +991,5 @@ public class PPO {
         }
         return null;
     }
-    
-    
+
 }
