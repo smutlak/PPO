@@ -30,8 +30,8 @@ import javax.xml.bind.annotation.XmlType;
 @Table(
         name = "insurer",
         indexes = {
-            @Index(name = "insurer_INDX_0", columnList = "code"),
-            @Index(name = "insurer_INDX_1", columnList = "short_description")})
+            @Index(name = "insurer_INDX_0", columnList = "auth"),
+            @Index(name = "insurer_INDX_1", columnList = "insurer_name")})
 @NamedQueries({
     @NamedQuery(name = "Insurer.findAll", query = "SELECT a Insurer FROM CPT a"),
     @NamedQuery(name = "Insurer.findByAuthLike", query = "SELECT a FROM Insurer a WHERE a.auth LIKE :auth"),
