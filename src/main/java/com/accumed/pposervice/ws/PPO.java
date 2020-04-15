@@ -6,6 +6,7 @@
 package com.accumed.pposervice.ws;
 
 import com.accumed.pposervice.model.*;
+import com.accumed.ws.wsinterface.rulesengine.service.ScrubScrubbingRequest;
 import com.haad.ClaimSubmission;
 import https.www_shafafiya_org.v2.Webservices;
 import java.io.File;
@@ -959,7 +960,7 @@ public class PPO {
         EntityManager em = getEMFactory().createEntityManager();
         try {
             cpts = em.createNamedQuery("CPT.findByCodeLike")
-                    .setParameter("code", code+'%')
+                    .setParameter("code", code + '%')
                     //.setParameter("short_description", '%'+desc+'%')
                     .getResultList();
             return cpts;
@@ -980,7 +981,7 @@ public class PPO {
         EntityManager em = getEMFactory().createEntityManager();
         try {
             icds = em.createNamedQuery("ICD.findByCodeLike")
-                    .setParameter("code", code+'%')
+                    .setParameter("code", code + '%')
                     //.setParameter("short_description", '%'+desc+'%')
                     .getResultList();
             return icds;
@@ -991,7 +992,7 @@ public class PPO {
         }
         return null;
     }
-    
+
     @WebMethod(operationName = "findInsurer")
     public java.util.List<Insurer> findInsurer(@WebParam(name = "auth") String auth,
             @WebParam(name = "name") String name) {
@@ -1001,8 +1002,8 @@ public class PPO {
         EntityManager em = getEMFactory().createEntityManager();
         try {
             insurers = em.createNamedQuery("Insurer.findByAuthOrNameLike")
-                    .setParameter("auth", '%'+auth+'%')
-                    .setParameter("insurer_name", '%'+name+'%')
+                    .setParameter("auth", '%' + auth + '%')
+                    .setParameter("insurer_name", '%' + name + '%')
                     .getResultList();
             return insurers;
         } catch (Exception e) {
@@ -1011,6 +1012,15 @@ public class PPO {
             em.close();
         }
         return null;
+    }
+
+    @WebMethod(operationName = "ValidateClaim")
+    public ScrubScrubbingRequest ValidateClaim(
+            @WebParam(name = "request") ScrubScrubbingRequest request,
+            @WebParam(name = "user") String user,
+            @WebParam(name = "psw") String psw,
+            @WebParam(name = "debug") Boolean debug) {
+        return RulesEngineUtils.scrub(request, user, psw, debug);
     }
 
 }
