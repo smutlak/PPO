@@ -991,5 +991,26 @@ public class PPO {
         }
         return null;
     }
+    
+    @WebMethod(operationName = "findInsurer")
+    public java.util.List<Insurer> findInsurer(@WebParam(name = "auth") String auth,
+            @WebParam(name = "name") String name) {
+
+        List<Insurer> insurers;
+
+        EntityManager em = getEMFactory().createEntityManager();
+        try {
+            insurers = em.createNamedQuery("Insurer.findByAuthOrNameLike")
+                    .setParameter("auth", auth+'%')
+                    .setParameter("insurer_name", name+'%')
+                    .getResultList();
+            return insurers;
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+        } finally {
+            em.close();
+        }
+        return null;
+    }
 
 }
