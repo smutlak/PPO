@@ -1024,4 +1024,20 @@ public class PPO {
         return RulesEngineUtils.scrub(request, user, psw, debug);
     }
 
+    @WebMethod(operationName = "getAccountFacilityLicense")
+    public String getAccountFacilityLicense(
+            @WebParam(name = "accountId") Long accountId) {
+        Account account = null;
+
+        EntityManager em = getEMFactory().createEntityManager();
+        try {
+            account = (Account) em.createNamedQuery("Account.findById").setParameter("id", accountId).getSingleResult();
+            return account.getRegLoginDetails().getFacilityLicense();
+        } catch (Exception e) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
+        } finally {
+            em.close();
+        }
+        return null;
+    }
 }
