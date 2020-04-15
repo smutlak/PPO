@@ -1,1 +1,2 @@
->mvn install:install-file -Dfile=C:\work2\wsInterface-1.0.4.4.jar -DgroupId=com.accumed.ws -DartifactId=wsInterface -Dversion=1.0.4.4 -Dpackaging=jar
+C:\Program Files\NetBeans 8.2\java\maven\bin>mvn install:install-file -Dfile=C:\work2\wsInterface-1.0.4.4.jar -DgroupId=com.accumed.ws -DartifactId=wsInterface -Dversion=1.0.4.4 -Dpackaging=jar
+C:\Program Files\NetBeans 8.2\java\maven\bin>mvn install:install-file -Dfile=C:\work2\Accumed-theme-1.0.0.2.jar -DgroupId=com.accumed.themes -DartifactId=Accumed-theme -Dversion=1.0.0.2 -Dpackaging=jar
