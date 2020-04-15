@@ -6,6 +6,7 @@
 package com.accumed.pposervice.ws;
 
 import com.accumed.pposervice.model.*;
+import com.accumed.ws.wsinterface.rulesengine.service.ScrubResponseReturn;
 import com.accumed.ws.wsinterface.rulesengine.service.ScrubScrubbingRequest;
 import com.haad.ClaimSubmission;
 import https.www_shafafiya_org.v2.Webservices;
@@ -1015,7 +1016,7 @@ public class PPO {
     }
 
     @WebMethod(operationName = "ValidateClaim")
-    public ScrubScrubbingRequest ValidateClaim(
+    public ScrubResponseReturn ValidateClaim(
             @WebParam(name = "request") ScrubScrubbingRequest request,
             @WebParam(name = "user") String user,
             @WebParam(name = "psw") String psw,
