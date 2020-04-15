@@ -96,7 +96,7 @@ public class PPO {
             executor.scheduleWithFixedDelay(new AccountTransactionsService(null),
                     2, 90, TimeUnit.MINUTES); //for account checking new transactions
             executor.scheduleWithFixedDelay(new TransactionDownloadService(),
-                    180, 9, TimeUnit.SECONDS); //for downloading transactions
+                    180, 180, TimeUnit.SECONDS); //for downloading transactions
         }
     }
 
@@ -1001,8 +1001,8 @@ public class PPO {
         EntityManager em = getEMFactory().createEntityManager();
         try {
             insurers = em.createNamedQuery("Insurer.findByAuthOrNameLike")
-                    .setParameter("auth", auth+'%')
-                    .setParameter("insurer_name", name+'%')
+                    .setParameter("auth", '%'+auth+'%')
+                    .setParameter("insurer_name", '%'+name+'%')
                     .getResultList();
             return insurers;
         } catch (Exception e) {
