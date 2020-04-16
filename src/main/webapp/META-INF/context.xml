@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context antiJARLocking="true" path="/PPOService">
   <ResourceLink global="jdbc/PPODS" name="jdbc/PPODS"/>
+  <ResourceLink global="RULES_ENGIN_SERVICE_URL" name="RULES_ENGIN_SERVICE_URL" type="java.lang.String"/>
 </Context>
