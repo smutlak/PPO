@@ -476,22 +476,22 @@ public class PPO {
         EntityManager em = getEMFactory().createEntityManager();
         try {
             //account = (Account) em.createNamedQuery("Account.findById").setParameter("id", accountId).getSingleResult();
-            if (account != null) {
+//            if (account != null) {
 //                Query q = em.createNativeQuery("Select * from totalVsLabs where senderid='"
 //                        + account.getRegLoginDetails().getFacilityLicense() + "'");
-                Query q = em.createNativeQuery("Select * from totalVsLabs where account_id="+accountId);
+            Query q = em.createNativeQuery("Select * from totalVsLabs where account_id=" + accountId);
 
-                List<Object[]> list = q.getResultList();
-                for (Object[] objs : list) {
-                    TotalsVSLabs lab = new TotalsVSLabs();
-                    lab.setMonth(objs[1] != null ? (((Double) objs[1]).intValue()) : 0);
-                    lab.setReceiverid(objs[2] != null ? ((String) objs[2]) : "");
-                    lab.setSenderid(objs[3] != null ? ((String) objs[3]) : "");
-                    lab.setTotal(objs[4] != null ? (((BigDecimal) objs[4]).doubleValue()) : 0);
-                    lab.setTotalLab(objs[5] != null ? (((BigDecimal) objs[5]).doubleValue()) : 0);
-                    lab.setClaimsCount(objs[6] != null ? (((Long) objs[6]).intValue()) : 0);
-                    ret.add(lab);
-                }
+            List<Object[]> list = q.getResultList();
+            for (Object[] objs : list) {
+                TotalsVSLabs lab = new TotalsVSLabs();
+                lab.setMonth(objs[1] != null ? (((Double) objs[1]).intValue()) : 0);
+                lab.setReceiverid(objs[2] != null ? ((String) objs[2]) : "");
+                lab.setSenderid(objs[3] != null ? ((String) objs[3]) : "");
+                lab.setTotal(objs[4] != null ? (((BigDecimal) objs[4]).doubleValue()) : 0);
+                lab.setTotalLab(objs[5] != null ? (((BigDecimal) objs[5]).doubleValue()) : 0);
+                lab.setClaimsCount(objs[6] != null ? (((Long) objs[6]).intValue()) : 0);
+                ret.add(lab);
+//                }
             }
         } catch (Exception e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
