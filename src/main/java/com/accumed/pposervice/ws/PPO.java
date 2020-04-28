@@ -806,21 +806,25 @@ public class PPO {
                     }
                     for (Account account : accounts) {
                         java.util.List<AccountTransaction> newTrans = getFacilityMonthTransaction(account.getId());
-                        List<AccountTransaction> persistedOnes = em.createNamedQuery("AccountTransaction.findByAccountId")
-                                .setParameter("account", account)
-                                .getResultList();
-                        java.util.List<AccountTransaction> transToBePersisted = removeAlreadyExistedTransactions(newTrans, persistedOnes);
-                        Logger.getLogger(AccountTransactionsService.class.getName()).log(Level.INFO,
-                                "AccountTransactionsService Account = {0} transToBePersisted={1} newTrans={2} persistedOnes={3}",
-                                new Object[]{account.getId(), transToBePersisted.size(), newTrans.size(), persistedOnes.size()});
+                        if (newTrans != null && !newTrans.isEmpty()) {
 
-                        em.getTransaction().begin();
-                        for (AccountTransaction tran : transToBePersisted) {
-                            tran.setAccount(account);
-                            em.merge(tran);
+                            List<AccountTransaction> persistedOnes = em.createNamedQuery("AccountTransaction.findByAccountId")
+                                    .setParameter("account", account)
+                                    .getResultList();
+                            java.util.List<AccountTransaction> transToBePersisted = removeAlreadyExistedTransactions(newTrans, persistedOnes);
+                            Logger.getLogger(AccountTransactionsService.class.getName()).log(Level.INFO,
+                                    "AccountTransactionsService Account = {0} transToBePersisted={1} newTrans={2} persistedOnes={3}",
+                                    new Object[]{account.getId(), transToBePersisted.size(), newTrans.size(), persistedOnes.size()});
 
+                            if (transToBePersisted != null && !transToBePersisted.isEmpty()) {
+                                em.getTransaction().begin();
+                                for (AccountTransaction tran : transToBePersisted) {
+                                    tran.setAccount(account);
+                                    em.merge(tran);
+                                }
+                                em.getTransaction().commit();
+                            }
                         }
-                        em.getTransaction().commit();
                     }
 
                 } catch (Exception e) {
