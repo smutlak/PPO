@@ -31,7 +31,8 @@ import javax.xml.bind.annotation.XmlType;
         name = "icd",
         indexes = {
             @Index(name = "icd_INDX_0", columnList = "code"),
-            @Index(name = "icd_INDX_1", columnList = "short_description")})
+            @Index(name = "icd_INDX_1", columnList = "short_description"),
+            @Index(name = "icd_INDX_2", columnList = "long_description")})
 @NamedQueries({
         @NamedQuery(name = "ICD.findAll", query = "SELECT a FROM ICD a"),
         @NamedQuery(name = "ICD.findByCodeLike", query = "SELECT a FROM ICD a WHERE a.code LIKE :code"),
@@ -43,7 +44,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
     "code",
-    "short_description"
+    "short_description",
+    "long_description"
 })
 public class ICD implements Serializable {
 
@@ -57,9 +59,13 @@ public class ICD implements Serializable {
     @XmlElement(name = "code")
     private String code;
 
-    @Column(name = "short_description", nullable = false, length=2048)
+    @Column(name = "short_description", nullable = false, length=1024)
     @XmlElement(name = "short_description")
     private String short_description;
+    
+    @Column(name = "long_description", length=2048)
+    @XmlElement(name = "long_description")
+    private String long_description;
 
    
     public ICD() {
@@ -87,6 +93,14 @@ public class ICD implements Serializable {
 
     public void setShort_description(String short_description) {
         this.short_description = short_description;
+    }
+
+    public String getLong_description() {
+        return long_description;
+    }
+
+    public void setLong_description(String long_description) {
+        this.long_description = long_description;
     }
 
     

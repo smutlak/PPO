@@ -34,9 +34,9 @@ import javax.xml.bind.annotation.XmlType;
             @Index(name = "insurer_INDX_1", columnList = "insurer_name")})
 @NamedQueries({
     @NamedQuery(name = "Insurer.findAll", query = "SELECT a Insurer FROM CPT a"),
-    @NamedQuery(name = "Insurer.findByAuthLike", query = "SELECT a FROM Insurer a WHERE a.auth LIKE :auth"),
-    @NamedQuery(name = "Insurer.findByNameLike", query = "SELECT a FROM Insurer a WHERE a.insurer_name LIKE :insurer_name"),
-    @NamedQuery(name = "Insurer.findByAuthOrNameLike", query = "SELECT a FROM Insurer a WHERE a.auth LIKE :auth OR a.insurer_name LIKE :insurer_name")})
+    @NamedQuery(name = "Insurer.findByAuthLike", query = "SELECT a FROM Insurer a WHERE lower(a.auth) LIKE lower(:auth)"),
+    @NamedQuery(name = "Insurer.findByNameLike", query = "SELECT a FROM Insurer a WHERE lower(a.insurer_name) LIKE lower(:insurer_name)"),
+    @NamedQuery(name = "Insurer.findByAuthOrNameLike", query = "SELECT a FROM Insurer a WHERE lower(a.auth) LIKE lower(:auth) OR lower(a.insurer_name) LIKE lower(:insurer_name)")})
 
 @XmlRootElement(name = "cpt")
 @XmlAccessorType(XmlAccessType.FIELD)
