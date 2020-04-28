@@ -40,6 +40,7 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.xml.bind.JAXBContext;
@@ -98,7 +99,7 @@ public class PPO {
             executor.scheduleWithFixedDelay(new AccountTransactionsService(null),
                     2, 90, TimeUnit.MINUTES); //for account checking new transactions
             executor.scheduleWithFixedDelay(new TransactionDownloadService(),
-                    180, 180, TimeUnit.SECONDS); //for downloading transactions
+                    60, 60, TimeUnit.SECONDS); //for downloading transactions
         }
     }
 
@@ -898,7 +899,18 @@ public class PPO {
                     }
                 }
 
-            } catch (Exception e) {
+            } catch(NoResultException e)
+            {
+                Logger.getLogger(getClass().getName()).log(Level.INFO, "No waiting transactions to be downloaded.");
+                if (em != null) {
+                    if (em.getTransaction().isActive()) {
+                        em.getTransaction().rollback();
+                    }
+                    em.close();
+                    em = null;
+                }
+            }
+            catch (Exception e) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
                 if (em != null) {
                     if (em.getTransaction().isActive()) {
@@ -987,9 +999,9 @@ public class PPO {
 
         EntityManager em = getEMFactory().createEntityManager();
         try {
-            icds = em.createNamedQuery("ICD.findByCodeLike")
-                    .setParameter("code", code + '%')
-                    //.setParameter("short_description", '%'+desc+'%')
+            icds = em.createNamedQuery("ICD.findByCodeOrLongLike")
+                    .setParameter("code", '%' + code + '%')
+                    .setParameter("long_description", '%'+desc+'%')
                     .getResultList();
             return icds;
         } catch (Exception e) {

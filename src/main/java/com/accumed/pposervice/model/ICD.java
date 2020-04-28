@@ -35,9 +35,10 @@ import javax.xml.bind.annotation.XmlType;
             @Index(name = "icd_INDX_2", columnList = "long_description")})
 @NamedQueries({
         @NamedQuery(name = "ICD.findAll", query = "SELECT a FROM ICD a"),
-        @NamedQuery(name = "ICD.findByCodeLike", query = "SELECT a FROM ICD a WHERE a.code LIKE :code"),
-        @NamedQuery(name = "ICD.findByDescLike", query = "SELECT a FROM ICD a WHERE a.short_description LIKE :short_description"),
-        @NamedQuery(name = "ICD.findByCodeOrDescLike", query = "SELECT a FROM ICD a WHERE a.code LIKE :code OR a.short_description LIKE :short_description")})
+        @NamedQuery(name = "ICD.findByCodeLike", query = "SELECT a FROM ICD a WHERE lower(a.code) LIKE lower(:code)"),
+        @NamedQuery(name = "ICD.findByDescLike", query = "SELECT a FROM ICD a WHERE lower(a.short_description) LIKE lower(:short_description)"),
+        @NamedQuery(name = "ICD.findByCodeOrDescLike", query = "SELECT a FROM ICD a WHERE lower(a.code) LIKE lower(:code) OR lower(a.short_description) LIKE lower(:short_description)"),
+        @NamedQuery(name = "ICD.findByCodeOrLongLike", query = "SELECT a FROM ICD a WHERE lower(a.code) LIKE lower(:code) OR lower(a.long_description) LIKE lower(:long_description)")})
 
 
 @XmlRootElement(name = "icd")
