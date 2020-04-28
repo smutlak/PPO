@@ -31,7 +31,8 @@ import javax.xml.bind.annotation.XmlType;
         name = "cpt",
         indexes = {
             @Index(name = "cpt_INDX_0", columnList = "code"),
-            @Index(name = "cpt_INDX_1", columnList = "short_description")})
+            @Index(name = "cpt_INDX_1", columnList = "short_description"),
+            @Index(name = "cpt_INDX_2", columnList = "long_description")})
 @NamedQueries({
     @NamedQuery(name = "CPT.findAll", query = "SELECT a FROM CPT a"),
     @NamedQuery(name = "CPT.findByCodeLike", query = "SELECT a FROM CPT a WHERE a.code LIKE :code"),
@@ -42,7 +43,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
     "code",
-    "short_description"
+    "short_description",
+    "long_description"
 })
 public class CPT implements Serializable {
 
@@ -56,9 +58,18 @@ public class CPT implements Serializable {
     @XmlElement(name = "code")
     private String code;
 
-    @Column(name = "short_description", nullable = false, length=2048)
+    @Column(name = "short_description", nullable = false, length=1024)
     @XmlElement(name = "short_description")
     private String short_description;
+    
+    @Column(name = "long_description", nullable = false, length=2048)
+    @XmlElement(name = "long_description")
+    private String long_description;
+    
+    @Column(name = "full_description", columnDefinition="TEXT")
+    //@XmlElement(name = "full_description")
+    @XmlTransient
+    private String full_description;
 
    
     public CPT() {
@@ -88,5 +99,19 @@ public class CPT implements Serializable {
         this.short_description = short_description;
     }
 
-    
+    public String getLong_description() {
+        return long_description;
+    }
+
+    public void setLong_description(String long_description) {
+        this.long_description = long_description;
+    }
+
+    public String getFull_description() {
+        return full_description;
+    }
+
+    public void setFull_description(String full_description) {
+        this.full_description = full_description;
+    }
 }
