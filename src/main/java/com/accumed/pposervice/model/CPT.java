@@ -33,11 +33,13 @@ import javax.xml.bind.annotation.XmlType;
             @Index(name = "cpt_INDX_0", columnList = "code"),
             @Index(name = "cpt_INDX_1", columnList = "short_description"),
             @Index(name = "cpt_INDX_2", columnList = "long_description")})
+
 @NamedQueries({
     @NamedQuery(name = "CPT.findAll", query = "SELECT a FROM CPT a"),
-    @NamedQuery(name = "CPT.findByCodeLike", query = "SELECT a FROM CPT a WHERE a.code LIKE :code"),
-    @NamedQuery(name = "CPT.findByDescLike", query = "SELECT a FROM CPT a WHERE a.short_description LIKE :short_description"),
-    @NamedQuery(name = "CPT.findByCodeOrDescLike", query = "SELECT a FROM CPT a WHERE a.code LIKE :code OR a.short_description LIKE :short_description")})
+    @NamedQuery(name = "CPT.findByCodeLike", query = "SELECT a FROM CPT a WHERE lower(a.code) LIKE lower(:code)"),
+    @NamedQuery(name = "CPT.findByDescLike", query = "SELECT a FROM CPT a WHERE lower(a.short_description) LIKE lower(:short_description)"),
+    @NamedQuery(name = "CPT.findByCodeOrDescLike", query = "SELECT a FROM CPT a WHERE lower(a.code) LIKE lower(:code) OR lower(a.short_description) LIKE lower(:short_description)"),
+    @NamedQuery(name = "CPT.findByCodeOrLongLike", query = "SELECT a FROM CPT a WHERE lower(a.code) LIKE lower(:code) OR lower(a.long_description) LIKE lower(:long_description)")})
 
 @XmlRootElement(name = "cpt")
 @XmlAccessorType(XmlAccessType.FIELD)

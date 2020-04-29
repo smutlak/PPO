@@ -978,9 +978,10 @@ public class PPO {
 
         EntityManager em = getEMFactory().createEntityManager();
         try {
-            cpts = em.createNamedQuery("CPT.findByCodeLike")
-                    .setParameter("code", code + '%')
-                    //.setParameter("short_description", '%'+desc+'%')
+            cpts = em.createNamedQuery("CPT.findByCodeOrLongLike")
+                    .setParameter("code", '%' + code + '%')
+                    .setParameter("long_description", '%'+ desc+ '%')
+                    .setMaxResults(25)
                     .getResultList();
             return cpts;
         } catch (Exception e) {
@@ -1002,6 +1003,7 @@ public class PPO {
             icds = em.createNamedQuery("ICD.findByCodeOrLongLike")
                     .setParameter("code", '%' + code + '%')
                     .setParameter("long_description", '%'+desc+'%')
+                    .setMaxResults(25)
                     .getResultList();
             return icds;
         } catch (Exception e) {
