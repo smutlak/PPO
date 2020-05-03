@@ -469,7 +469,8 @@ public class PPO {
     }
 
     @WebMethod(operationName = "getAccuntTotalsVSLabs")
-    public java.util.List<TotalsVSLabs> getAccuntTotalsVSLabs(@WebParam(name = "accountId") Long accountId) {
+    public java.util.List<TotalsVSLabs> getAccuntTotalsVSLabs(@WebParam(name = "accountId") Long accountId, 
+            @WebParam(name = "currMonthOnly") Boolean currMonthOnly) {
 
         java.util.List<TotalsVSLabs> ret = new ArrayList();
         Account account = null;
@@ -485,12 +486,13 @@ public class PPO {
             List<Object[]> list = q.getResultList();
             for (Object[] objs : list) {
                 TotalsVSLabs lab = new TotalsVSLabs();
-                lab.setMonth(objs[1] != null ? (((Double) objs[1]).intValue()) : 0);
-                lab.setReceiverid(objs[2] != null ? ((String) objs[2]) : "");
-                lab.setSenderid(objs[3] != null ? ((String) objs[3]) : "");
-                lab.setTotal(objs[4] != null ? (((BigDecimal) objs[4]).doubleValue()) : 0);
-                lab.setTotalLab(objs[5] != null ? (((BigDecimal) objs[5]).doubleValue()) : 0);
-                lab.setClaimsCount(objs[6] != null ? (((Long) objs[6]).intValue()) : 0);
+                lab.setYear(objs[1] != null ? (((Double) objs[1]).intValue()) : 0);
+                lab.setMonth(objs[2] != null ? (((Double) objs[2]).intValue()) : 0);
+                lab.setReceiverid(objs[3] != null ? ((String) objs[3]) : "");
+                lab.setSenderid(objs[4] != null ? ((String) objs[4]) : "");
+                lab.setTotal(objs[5] != null ? (((BigDecimal) objs[5]).doubleValue()) : 0);
+                lab.setTotalLab(objs[6] != null ? (((BigDecimal) objs[6]).doubleValue()) : 0);
+                lab.setClaimsCount(objs[7] != null ? (((Long) objs[7]).intValue()) : 0);
                 ret.add(lab);
 //                }
             }

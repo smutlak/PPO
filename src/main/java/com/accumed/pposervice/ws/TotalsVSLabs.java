@@ -19,6 +19,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "TotalsVSLabs")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
+    "year",
     "month",
     "receiverid",
     "senderid",
@@ -27,6 +28,9 @@ import javax.xml.bind.annotation.XmlType;
     "claimsCount"
 })
 public class TotalsVSLabs implements Serializable {
+    
+    @XmlElement(name = "year")
+    private Integer year;
     
     @XmlElement(name = "month")
     private Integer month;
@@ -93,8 +97,12 @@ public class TotalsVSLabs implements Serializable {
     public void setClaimsCount(Integer claimsCount) {
         this.claimsCount = claimsCount;
     }
-    
-    
-    
-    
+
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
 }
