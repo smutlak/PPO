@@ -469,7 +469,7 @@ public class PPO {
     }
 
     @WebMethod(operationName = "getAccuntTotalsVSLabs")
-    public java.util.List<TotalsVSLabs> getAccuntTotalsVSLabs(@WebParam(name = "accountId") Long accountId, 
+    public java.util.List<TotalsVSLabs> getAccuntTotalsVSLabs(@WebParam(name = "accountId") Long accountId,
             @WebParam(name = "currMonthOnly") Boolean currMonthOnly) {
 
         java.util.List<TotalsVSLabs> ret = new ArrayList();
@@ -481,7 +481,9 @@ public class PPO {
 //            if (account != null) {
 //                Query q = em.createNativeQuery("Select * from totalVsLabs where senderid='"
 //                        + account.getRegLoginDetails().getFacilityLicense() + "'");
-            Query q = em.createNativeQuery("Select * from totalVsLabs where account_id=" + accountId);
+
+//Query q = em.createNativeQuery("Select * from totalVsLabs where account_id=" + accountId);
+            Query q = em.createNativeQuery("Select l.*, ins.insurer_name from totalvslabs l inner join insurer ins on ins.auth = l.receiverid where account_id=" + accountId);
 
             List<Object[]> list = q.getResultList();
             for (Object[] objs : list) {
@@ -493,6 +495,7 @@ public class PPO {
                 lab.setTotal(objs[5] != null ? (((BigDecimal) objs[5]).doubleValue()) : 0);
                 lab.setTotalLab(objs[6] != null ? (((BigDecimal) objs[6]).doubleValue()) : 0);
                 lab.setClaimsCount(objs[7] != null ? (((Long) objs[7]).intValue()) : 0);
+                lab.setReceivername(objs[8] != null ? ((String) objs[8]) : "");
                 ret.add(lab);
 //                }
             }
@@ -901,8 +904,7 @@ public class PPO {
                     }
                 }
 
-            } catch(NoResultException e)
-            {
+            } catch (NoResultException e) {
                 Logger.getLogger(getClass().getName()).log(Level.INFO, "No waiting transactions to be downloaded.");
                 if (em != null) {
                     if (em.getTransaction().isActive()) {
@@ -911,8 +913,7 @@ public class PPO {
                     em.close();
                     em = null;
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, "an exception was thrown", e);
                 if (em != null) {
                     if (em.getTransaction().isActive()) {
@@ -982,7 +983,7 @@ public class PPO {
         try {
             cpts = em.createNamedQuery("CPT.findByCodeOrLongLike")
                     .setParameter("code", '%' + code + '%')
-                    .setParameter("long_description", '%'+ desc+ '%')
+                    .setParameter("long_description", '%' + desc + '%')
                     .setMaxResults(25)
                     .getResultList();
             return cpts;
@@ -1004,7 +1005,7 @@ public class PPO {
         try {
             icds = em.createNamedQuery("ICD.findByCodeOrLongLike")
                     .setParameter("code", '%' + code + '%')
-                    .setParameter("long_description", '%'+desc+'%')
+                    .setParameter("long_description", '%' + desc + '%')
                     .setMaxResults(25)
                     .getResultList();
             return icds;

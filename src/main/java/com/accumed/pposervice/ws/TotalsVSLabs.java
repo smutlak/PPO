@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlType;
     "year",
     "month",
     "receiverid",
+    "receivername",
     "senderid",
     "total",
     "totalLab",
@@ -37,6 +38,9 @@ public class TotalsVSLabs implements Serializable {
     
     @XmlElement(name = "receiverid")
     private String receiverid;
+    
+    @XmlElement(name = "receivername")
+    private String receivername;
     
     @XmlElement(name = "senderid")
     private String senderid;
@@ -105,4 +109,14 @@ public class TotalsVSLabs implements Serializable {
     public void setYear(Integer year) {
         this.year = year;
     }
+
+    public String getReceivername() {
+        return receivername;
+    }
+
+    public void setReceivername(String receivername) {
+        this.receivername = receivername;
+    }
+    
+    
 }
